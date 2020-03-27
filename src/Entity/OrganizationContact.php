@@ -3,18 +3,14 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Ramsey\Uuid\Uuid;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\OrganizationContactRepository")
  */
 class OrganizationContact
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    use EntityIdTrait;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -57,9 +53,22 @@ class OrganizationContact
      */
     private $organization;
 
-    public function getId(): ?int
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $notifyViaEmail;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $notifyViaMobile;
+
+    public function __construct()
     {
-        return $this->id;
+        $this->uuid = Uuid::uuid4();
+        $this->isPrimary = false;
+        $this->notifyViaEmail = true;
+        $this->notifyViaMobile = true;
     }
 
     public function getName(): ?string
@@ -154,6 +163,30 @@ class OrganizationContact
     public function setOrganization(?Organization $organization): self
     {
         $this->organization = $organization;
+
+        return $this;
+    }
+
+    public function getNotifyViaEmail(): ?bool
+    {
+        return $this->notifyViaEmail;
+    }
+
+    public function setNotifyViaEmail(bool $notifyViaEmail): self
+    {
+        $this->notifyViaEmail = $notifyViaEmail;
+
+        return $this;
+    }
+
+    public function getNotifyViaMobile(): ?bool
+    {
+        return $this->notifyViaMobile;
+    }
+
+    public function setNotifyViaMobile(bool $notifyViaMobile): self
+    {
+        $this->notifyViaMobile = $notifyViaMobile;
 
         return $this;
     }

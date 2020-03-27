@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Doctrine\UuidEncoder;
 use App\Entity\OrganizationContact;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -14,9 +15,12 @@ use Doctrine\Common\Persistence\ManagerRegistry;
  */
 class OrganizationContactRepository extends ServiceEntityRepository
 {
+    use RepositoryUuidFinderTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, OrganizationContact::class);
+        $this->uuidEncoder = new UuidEncoder();
     }
 
     // /**
