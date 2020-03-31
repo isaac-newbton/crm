@@ -1,0 +1,34 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>Organizations</h1>
+	<a href="{{ path('organization_add') }}">+Add</a>
+	<table>
+		<thead>
+			<tr>
+				<th>Organization</th>
+				<th>Leads</th>
+				<th>Contacts</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for organization in organizations %}
+				<tr id="{{ uuid_encode(organization.uuid) }}">
+					<td>
+						{{ organization.name }}
+					</td>
+					<td>
+						{{ organization.leads|length }}
+					</td>
+					<td>
+						<a href="{{ path('organization_contact_list', {encodedUuid:uuid_encode(organization.uuid)}) }}">{{ organization.contacts|length }}</a>
+					</td>
+					<td>
+						<a href="{{ path('organization_delete', {encodedUuid:uuid_encode(organization.uuid)}) }}">Delete</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

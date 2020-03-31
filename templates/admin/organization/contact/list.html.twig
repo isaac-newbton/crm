@@ -1,0 +1,54 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>Contacts in <a href="{{ path('organization_home', {_fragment:uuid_encode(organization.uuid)}) }}">{{ organization.name }}</a></h1>
+	<a href="{{ path('organization_add_contact', {encodedUuid:uuid_encode(organization.uuid)}) }}">+Add</a>
+	<table>
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Email</th>
+				<th>Phone</th>
+				<th>Notify</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for contact in organization.contacts %}
+				<tr id="{{ uuid_encode(contact.uuid) }}">
+					<td valign="top"{% if contact.isPrimary %} style="font-weight:bold"{% endif %}>
+						{{ contact.name }}
+						{% if contact.jobTitle is not empty %}
+							<br><em>{{ contact.jobTitle }}</em>
+						{% endif %}
+					</td>
+					<td valign="top">
+						{{ contact.email }}
+					</td>
+					<td valign="top">
+						{% if contact.mobilePhone is not empty %}
+							M: {{ contact.mobilePhone }}<br>
+						{% endif %}
+						{% if contact.workPhone is not empty %}
+							W: {{ contact.workPhone }}<br>
+						{% endif %}
+						{% if contact.homePhone is not empty %}
+							H: {{ contact.homePhone }}
+						{% endif %}
+					</td>
+					<td valign="top">
+						{% if contact.notifyViaEmail %}
+							Email<br>
+						{% endif %}
+						{% if contact.notifyViaMobile and (contact.mobilePhone is not empty) %}
+							Text (mobile)
+						{% endif %}
+					</td>
+					<td valign="top">
+						<a href="{{ path('organization_delete_contact', {encodedUuid:uuid_encode(contact.uuid)}) }}">Delete</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

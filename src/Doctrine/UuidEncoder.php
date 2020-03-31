@@ -16,7 +16,7 @@ class UuidEncoder{
 				array_reduce(
 					[20,16,12,8],
 					function($uuid, $offset){
-						return substr_replace($uuid, '-', $offset);
+						return substr_replace($uuid, '-', $offset, 0);
 					},
 					str_pad(
 						gmp_strval(gmp_init($encoded, 62), 16),
