@@ -20,17 +20,20 @@ class Organization
     private $name;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Organizationcontact", mappedBy="organization", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\OrganizationContact", mappedBy="organization", orphanRemoval=true)
+     * @ORM\OrderBy({"name" = "ASC"})
      */
     private $contacts;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\OrganizationApi", mappedBy="organization", orphanRemoval=true)
+     * @ORM\OrderBy({"name" = "ASC"})
      */
     private $organizationApis;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Lead", mappedBy="organization", orphanRemoval=true)
+     * @ORM\OrderBy({"dt" = "DESC"})
      */
     private $leads;
 

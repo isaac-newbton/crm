@@ -1,0 +1,30 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>Add a contact to {{ organization.name }}</h1>
+	<p><a href="{{ path('organization_contact_list', {encodedUuid:uuid_encode(organization.uuid)}) }}">-Cancel</a></p>
+	<form action="{{ path('organization_create_contact', {encodedUuid:uuid_encode(organization.uuid)}) }}" method="post">
+		<label for="name">Name*</label>
+		<input type="text" name="name" id="name" placeholder="Name is required" required>
+		<label for="title">Job Title</label>
+		<input type="text" name="title" id="title">
+		<br>
+		<label for="email">Email*</label>
+		<input type="email" name="email" id="email" placeholder="Email is required" required>
+		<br>
+		<label for="mobile">Mobile Phone</label>
+		<input type="text" name="mobile" id="mobile">
+		<label for="work">Work Phone</label>
+		<input type="text" name="work" id="work">
+		<label for="home">Home Phone</label>
+		<input type="text" name="home" id="home">
+		<br>
+		<label for="primary"><input type="checkbox" name="primary" id="primary" checked> Primary</label>
+		<br>
+		Allowed notifications:
+		<label for="notify_email"><input type="checkbox" name="notify_email" id="notify_email" checked>Email</label>
+		<label for="notify_mobile"><input type="checkbox" name="notify_mobile" id="notify_mobile" checked>Mobile</label>
+		<br>
+		<button type="submit">Add</button>
+	</form>
+{% endblock %}
