@@ -9,6 +9,8 @@
 				<th>Organization</th>
 				<th>Leads</th>
 				<th>Contacts</th>
+				<th>Api Keys</th>
+				<th>Identifier</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
@@ -23,6 +25,12 @@
 					</td>
 					<td>
 						<a href="{{ path('organization_contact_list', {encodedUuid:uuid_encode(organization.uuid)}) }}">{{ organization.contacts|length }}</a>
+					</td>
+					<td>
+						<a href="{{ path('organization_api_list', {encodedUuid:uuid_encode(organization.uuid)}) }}">{{ organization.organizationApis|length }}</a>
+					</td>
+					<td>
+						{{ uuid_encode(organization.uuid) }}
 					</td>
 					<td>
 						<a href="{{ path('organization_delete', {encodedUuid:uuid_encode(organization.uuid)}) }}">Delete</a>
