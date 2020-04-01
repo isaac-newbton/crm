@@ -21,7 +21,8 @@
 						{{ organization.name }}
 					</td>
 					<td>
-						{{ organization.leads|length }}
+						<a href="{{ path('organization_leads', {encodedUuid:uuid_encode(organization.uuid)}) }}">{{ organization.leads|length }}</a>
+
 					</td>
 					<td>
 						<a href="{{ path('organization_contact_list', {encodedUuid:uuid_encode(organization.uuid)}) }}">{{ organization.contacts|length }}</a>

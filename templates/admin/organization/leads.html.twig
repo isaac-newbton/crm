@@ -1,0 +1,24 @@
+{% extends "base.html.twig" %}
+
+
+{% block body %}
+	<h1>{{organization.name}}
+		Leads</h1>
+	<ul>
+		{% for lead in organization.leads %}
+
+			{# Specific logic to display leads sent from WPFORMS plugin #}
+			{% if 'wpforms_id' in lead.fields|keys %}
+				{% for value in lead.fields.fields %}
+					{% if value['value'] != '' %}{% endif %}
+					<li>{{ value['name'] }}
+						:
+						{{ value['value'] }}</li>
+				{% endfor %}
+				{{ dump(lead.fields)}}
+				<hr>
+			{% endif %}
+
+		{% endfor %}
+	</ul>
+{% endblock %}
