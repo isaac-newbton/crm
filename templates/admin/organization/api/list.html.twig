@@ -1,0 +1,34 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>API keys in <a href="{{ path('organization_home', {_fragment:uuid_encode(organization.uuid)}) }}">{{ organization.name }}</a></h1>
+	<form action="{{ path('organization_create_api', {encodedUuid:uuid_encode(organization.uuid)}) }}" method="post">
+		<label for="name">Add new key with name:</label>
+		<input type="text" name="name" id="name" required placeholder="Name is required">
+		<button type="submit">+Add</button>
+	</form>
+	<table>
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Key</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for api in organization.organizationApis %}
+				<tr>
+					<td>
+						{{ api.name }}
+					</td>
+					<td>
+						{{ api.apiKey }}
+					</td>
+					<th>
+						<a href="{{ path('organization_delete_api', {encodedUuid:uuid_encode(organization.uuid), apiKey:api.apiKey}) }}">Delete</a>
+					</th>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}
