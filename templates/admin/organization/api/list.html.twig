@@ -2,7 +2,11 @@
 
 {% block body %}
 	<h1>API keys in <a href="{{ path('organization_home', {_fragment:uuid_encode(organization.uuid)}) }}">{{ organization.name }}</a></h1>
-	<a href="{{ path('organization_create_api', {encodedUuid:uuid_encode(organization.uuid)}) }}">+Add</a>
+	<form action="{{ path('organization_create_api', {encodedUuid:uuid_encode(organization.uuid)}) }}" method="post">
+		<label for="name">Add new key with name:</label>
+		<input type="text" name="name" id="name" required placeholder="Name is required">
+		<button type="submit">+Add</button>
+	</form>
 	<table>
 		<thead>
 			<tr>

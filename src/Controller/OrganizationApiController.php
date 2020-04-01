@@ -30,7 +30,7 @@ class OrganizationApiController extends AbstractController{
 	/**
 	 * @Route("/admin/organization/{encodedUuid}/api/create", name="organization_create_api")
 	 */
-	public function create(string $encodedUuid, OrganizationRepository $orgRepository, UuidEncoder $encoder, OrganizationApiService $apiService){
+	public function create(Request $request, string $encodedUuid, OrganizationRepository $orgRepository, UuidEncoder $encoder, OrganizationApiService $apiService){
 		/**
 		 * @var Organization|null
 		 */
@@ -38,6 +38,12 @@ class OrganizationApiController extends AbstractController{
 		if(!$organization) return $this->redirectToRoute('organization_home');
 		$manager = $this->getDoctrine()->getManager();
 		$orgApi = $apiService->generate($organization, $manager, $encoder);
+		$name = $request->request->get('name');
+		if(null!=$name){
+			$orgApi->setName($name);
+			$manager->persist($orgApi);
+			$manager->flush();
+		}
 		return $this->redirectToRoute('organization_api_list', ['encodedUuid'=>$encodedUuid]);
 	}
 
