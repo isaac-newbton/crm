@@ -1,0 +1,22 @@
+{% extends "email/base.html.twig" %}
+
+{% block body %}
+	<table width="100%" align="left" border="0" cellpadding="15" cellspacing="0" style="width:100%;">
+		<tbody>
+			<tr>
+				<td>
+					<h1>Inbound Lead Received</h1>
+					<p>The following data was collected on an inbound lead for {{ lead.organization.name }} at {{ lead.dt|date("g:iA") }} on {{ lead.dt|date("F j, Y") }}:</p>
+					<table width="100%" align="left" border="1" cellpadding="2" cellspacing="0" style="width:100%; border-spacing:1px; border-color:#cccccc; margin-bottom:15px;">
+						<tbody>
+							{{ lead.fields|map((fieldName,fieldValue)=>
+								"<tr><td style=\"font-weight:bold;\">#{fieldName}</td><td>#{fieldValue}</td></tr>")|join('')|raw
+							}}
+						</tbody>
+					</table>
+					<p><b>Why am I getting this email?</b> This email is a contact email for {{ lead.organization.name }}. If you should not be notified of leads for {{ lead.organization.name }}, please contact the person in your organization who should be notified.</p>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+{% endblock %}

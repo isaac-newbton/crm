@@ -19,7 +19,11 @@ class SuperAdminController extends AbstractController{
 			$from = $request->request->get('from') . "@{$_ENV['MAILGUN_DOMAIN']}";
 			$to = $request->request->get('to');
 			if(filter_var($from, FILTER_VALIDATE_EMAIL) && filter_var($to, FILTER_VALIDATE_EMAIL)){
-				$sent = $emailService->sendSingleHtml($to, "Test Email From {$_ENV['MAILGUN_DOMAIN']}", "<h1>Test</h1>This is a test email sent as <b>$from</b>.", $from);
+				$title = "Test Email From {$_ENV['MAILGUN_DOMAIN']}";
+				$message = $this->renderView('email/base.html.twig', [
+					'title'=>$title
+				]);
+				$sent = $emailService->sendSingleHtml($to, $title, $message, $from);
 			}
 		}
 
