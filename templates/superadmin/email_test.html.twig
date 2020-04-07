@@ -1,0 +1,23 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>Test Email</h1>
+	<a href="{{ path('organization_home') }}">Home</a>
+	{% if sent %}
+		<h2>Send data</h2>
+		<pre>
+			{{ sent|raw }}
+		</pre>
+	{% endif %}
+
+	<p>Send an email test</p>
+	<form method="post">
+		<label for="from">From email*</label>
+		<input type="text" name="from" id="from" required placeholder="{{ dotenv('MAILGUN_DEFAULT_EMAIL_USER') }}" value="{{ dotenv('MAILGUN_DEFAULT_EMAIL_USER') }}">@{{ dotenv('MAILGUN_DOMAIN') }}
+		<br>
+		<label for="to">To email*</label>
+		<input type="email" name="to" id="to" required>
+		<br>
+		<button type="submit">Send</button>
+	</form>
+{% endblock %}
