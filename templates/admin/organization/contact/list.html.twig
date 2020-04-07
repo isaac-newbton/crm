@@ -17,7 +17,7 @@
 			{% for contact in organization.contacts %}
 				<tr id="{{ uuid_encode(contact.uuid) }}">
 					<td valign="top"{% if contact.isPrimary %} style="font-weight:bold"{% endif %}>
-						{{ contact.name }}
+						<a href="{{ path('organization_edit_contact', {encodedUuid:uuid_encode(contact.uuid)}) }}">{{ contact.name }}</a>
 						{% if contact.jobTitle is not empty %}
 							<br><em>{{ contact.jobTitle }}</em>
 						{% endif %}
