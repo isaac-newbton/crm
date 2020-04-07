@@ -6,18 +6,81 @@ use App\Doctrine\UuidEncoder;
 use App\Repository\OrganizationRepository;
 use App\Service\OrganizationApiService;
 use App\Service\OrganizationLeadService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class WebhookController extends AbstractController
 {
+
+    /**
+     * @Route("/facebook/webhook")
+     * 
+     * This endpoint is a catch all from facebook
+     */
+    public function facebookAuth(Request $request, OrganizationLeadService $organizationLeadService, OrganizationRepository $organizationRepository, EntityManagerInterface $entityManagerInterface)
+    {
+
+        /** 
+         * todo: if we are recieving a leadgen object:
+         * todo: token ($token) returned from previous step stored (somewhere)
+         * todo: retreive the lead details and store in database - fallback to store leadgen object in database
+         * todo: notify related org contacts after saving data
+         */
+        $data = json_decode($request->getContent());
+        if ($data->object == 'page' && $data->entry[0]->changes[0]->field == 'leadgen') {
+            $leadgen = get_object_vars($data->entry[0]->changes[0]->value);
+            $page_id = $leadgen['page_id'];
+            // todo try and find the page in the crm from this id
+        }
+
+        $organizationLeadService->createLeadFromArray(
+            $organizationRepository->findOneByEncodedUuid('3hSX7N1OSn6zyt9XgjqGvH'), // hardcded for now
+            $leadgen, // fallback to storing leadgen until we can retreive lead details
+            $entityManagerInterface
+        );
+        // }
+
+        /**
+         * todo: if we are auth:
+         * todo: check if token exists (somewheere) and ping facebook to refresh
+         * todo: user logins to facebook and authorizes app to manage pages
+         */
+        $challenge = $request->query->get('hub_challenge');
+        $verify_token = $request->query->get('hub_verify_token');
+        if ($verify_token === 'funnelkake-crm') {
+            // error_log('request: ' . $request);
+            // error_log('token matches');
+            // error_log('challenge: ' . $challenge);
+            return new Response($challenge);
+        } else {
+            // error_log('token mismatch');
+            // error_log('request: ' . $request);
+            return new JsonResponse('error');
+        }
+    }
+
+    /**
+     * @Route("/facebook/auth")
+     */
+    public function fbAuthorizeApp(Request $request)
+    {
+        return $this->render('admin/organization/facebook.auth.twig');
+    }
+
     /**
      * @Route("/webhook/facebook/new_lead/{orgEncodedUuid}/{orgApiKey}", name="webhook_facebook_new_lead")
      */
     public function facebook(Request $request, string $orgEncodedUuid, string $orgApiKey, OrganizationRepository $orgRepository, OrganizationApiService $orgApiService, OrganizationLeadService $orgLeadService, UuidEncoder $uuidEncoder)
     {
+        /**
+         * todo: webhooks get sent here and contain a lead_id - request lead details by providing stored token
+         * todo: if we have auth to fetch the lead: store the lead details in the database
+         * todo: else, store the leadgen object to fetch the details later
+         */
         return new JsonResponse(['request' => $request->request->all()], 200);
     }
 

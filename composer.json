@@ -4,10 +4,14 @@
 	"require": {
 		"php": "^7.2.5",
 		"ext-ctype": "*",
+		"ext-gmp": "*",
 		"ext-iconv": "*",
+		"facebook/graph-sdk": "^5.7",
+		"facebook/php-ads-sdk": "^6.0",
 		"facebook/php-business-sdk": "^6.0",
 		"ramsey/uuid-doctrine": "^1.6",
 		"sensio/framework-extra-bundle": "^5.1",
+		"symfony/apache-pack": "^1.0",
 		"symfony/asset": "5.0.*",
 		"symfony/console": "5.0.*",
 		"symfony/dotenv": "5.0.*",
@@ -67,7 +71,9 @@
 			"cache:clear": "symfony-cmd",
 			"assets:install %PUBLIC_DIR%": "symfony-cmd"
 		},
-		"post-install-cmd": [],
+		"post-install-cmd": [
+			"@auto-scripts"
+		],
 		"post-update-cmd": [
 			"@auto-scripts"
 		]
