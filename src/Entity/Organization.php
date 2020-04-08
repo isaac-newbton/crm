@@ -37,6 +37,11 @@ class Organization
      */
     private $leads;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $facebookPage;
+
     public function __construct()
     {
         $this->uuid = Uuid::uuid4();
@@ -146,6 +151,18 @@ class Organization
                 $lead->setOrganization(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFacebookPage(): ?string
+    {
+        return $this->facebookPage;
+    }
+
+    public function setFacebookPage(?string $facebookPage): self
+    {
+        $this->facebookPage = $facebookPage;
 
         return $this;
     }

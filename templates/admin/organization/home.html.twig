@@ -11,6 +11,7 @@
 				<th>Contacts</th>
 				<th>Api Keys</th>
 				<th>Identifier</th>
+				<th>Facebook Page</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
@@ -18,7 +19,7 @@
 			{% for organization in organizations %}
 				<tr id="{{ uuid_encode(organization.uuid) }}">
 					<td>
-						{{ organization.name }}
+						<a href="{{ path('organization_edit', {encodedUuid:uuid_encode(organization.uuid)}) }}">{{ organization.name }}</a>
 					</td>
 					<td>
 						<a href="{{ path('organization_leads', {encodedUuid:uuid_encode(organization.uuid)}) }}">{{ organization.leads|length }}</a>
@@ -32,6 +33,9 @@
 					</td>
 					<td>
 						{{ uuid_encode(organization.uuid) }}
+					</td>
+					<td>
+						{{ organization.facebookPage }}
 					</td>
 					<td>
 						<a href="{{ path('organization_delete', {encodedUuid:uuid_encode(organization.uuid)}) }}">Delete</a>
