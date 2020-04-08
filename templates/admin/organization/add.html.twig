@@ -5,7 +5,9 @@
 	<p><a href="{{ path('organization_home') }}">-Cancel</a></p>
 	<form action="{{ path('organization_create') }}" method="post">
 		<label for="name">Name*</label>
-		<input type="text" name="name" id="name" required placeholder="Name is required">
+		<input type="text" name="name" id="name" required placeholder="Name is required"><br>
+		<label for="facebookPage">FB Page ID</label>
+		<input type="text" name="facebookPage" id="facebookPage" placeholder="Facebook page ID"><br>
 		<button type="submit">Add</button>
 	</form>
 {% endblock %}

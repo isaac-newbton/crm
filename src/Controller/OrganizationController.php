@@ -37,6 +37,21 @@ class OrganizationController extends AbstractController
 	}
 
 	/**
+	 * @Route("/admin/organization/edit/{encodedUuid}", name="organization_edit")
+	 */
+	public function edit(string $encodedUuid, OrganizationRepository $orgRepository)
+	{
+		$organization = $orgRepository->findOneByEncodedUuid($encodedUuid);
+		if(!$organization) return $this->redirectToRoute('organization_home');
+		return $this->render(
+			'admin/organization/edit.html.twig',
+			[
+				'organization'=>$organization
+			]
+		);
+	}
+
+	/**
 	 * @Route("/admin/organization/delete/{encodedUuid}", name="organization_delete")
 	 */
 	public function delete(string $encodedUuid, OrganizationRepository $orgRepository)
@@ -55,14 +70,35 @@ class OrganizationController extends AbstractController
 	public function create(Request $request)
 	{
 		$name = $request->request->get('name');
+		$facebookPage = $request->request->get('facebookPage');
 		if (!empty($name)) {
 			$organization = new Organization();
 			$organization->setName($name);
+			$organization->setFacebookPage($facebookPage);
 			$manager = $this->getDoctrine()->getManager();
 			$manager->persist($organization);
 			$manager->flush();
 		}
 		return $this->redirectToRoute('organization_home');
+	}
+
+	/**
+	 * @Route("/admin/organization/update/{encodedUuid}", name="organization_update")
+	 */
+	public function update(Request $request, string $encodedUuid, OrganizationRepository $orgRepository)
+	{
+		if ($organization = $orgRepository->findOneByEncodedUuid($encodedUuid)) {
+			$name = $request->request->get('name');
+			$facebookPage = $request->request->get('facebookPage');
+			if (!empty($name)) {
+				$organization->setName($name);
+				$organization->setFacebookPage($facebookPage);
+				$manager = $this->getDoctrine()->getManager();
+				$manager->persist($organization);
+				$manager->flush();
+			}
+		}
+		return $this->redirectToRoute('organization_home', ['_fragment' => $organization ? $organization->getId() : '0']);
 	}
 
 	/**
