@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class WebhookController extends AbstractController
 {
     /**
-     * @Route("/webhook/verify_connection/{orgEncodedUuid}/{orgApiKey}", name="webhook_new_lead", methods={"GET"})
+     * @Route("/webhook/verify_connection/{orgEncodedUuid}/{orgApiKey}", name="webhook_verify_connection", methods={"GET"})
      */
     public function verify(Request $request, string $orgEncodedUuid, string $orgApiKey, OrganizationRepository $orgRepository, OrganizationApiService $orgApiService)
     {
