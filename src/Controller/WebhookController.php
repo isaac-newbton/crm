@@ -14,6 +14,20 @@ use Symfony\Component\Routing\Annotation\Route;
 class WebhookController extends AbstractController
 {
     /**
+     * @Route("/webhook/verify_connection/{orgEncodedUuid}/{orgApiKey}", name="webhook_verify_connection", methods={"GET"})
+     */
+    public function verify(Request $request, string $orgEncodedUuid, string $orgApiKey, OrganizationRepository $orgRepository, OrganizationApiService $orgApiService)
+    {
+        if (!$organization = $orgRepository->findOneByEncodedUuid($orgEncodedUuid)) {
+            return new JsonResponse(['error' => 'invalid organization id'], 401);
+        }
+        if (!$orgApiService->keyIsValid($organization, $orgApiKey)) {
+            return new JsonResponse(['error' => 'invalid key'], 401);
+        }
+        return new JsonResponse(['success' => true], 200);
+    }
+
+    /**
      * @Route("/webhook/facebook/new_lead/{orgEncodedUuid}/{orgApiKey}", name="webhook_facebook_new_lead")
      */
     public function facebook(Request $request, string $orgEncodedUuid, string $orgApiKey, OrganizationRepository $orgRepository, OrganizationApiService $orgApiService, OrganizationLeadService $orgLeadService, UuidEncoder $uuidEncoder)
