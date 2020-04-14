@@ -9,7 +9,7 @@
 					<p>The following data was collected on an inbound lead for {{ lead.organization.name }} at {{ lead.dt|date("g:iA") }} on {{ lead.dt|date("F j, Y") }}:</p>
 					<table width="100%" align="left" border="1" cellpadding="2" cellspacing="0" style="width:100%; border-spacing:1px; border-color:#cccccc; margin-bottom:15px;">
 						<tbody>
-							{{ lead.fields|map((fieldName,fieldValue)=>
+							{{ lead.fields|map((fieldValue,fieldName)=>
 								"<tr><td style=\"font-weight:bold;\">#{fieldName}</td><td>#{fieldValue}</td></tr>")|join('')|raw
 							}}
 						</tbody>
