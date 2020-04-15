@@ -3,6 +3,7 @@
 	"license": "proprietary",
 	"require": {
 		"php": "^7.2.5",
+		"ext-gmp": "*",
 		"ext-ctype": "*",
 		"ext-iconv": "*",
 		"facebook/graph-sdk": "^5.7",
