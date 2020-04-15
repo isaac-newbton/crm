@@ -5,6 +5,7 @@
 		"php": "^7.2.5",
 		"ext-ctype": "*",
 		"ext-iconv": "*",
+		"facebook/graph-sdk": "^5.7",
 		"kriswallsmith/buzz": "^1.1",
 		"mailgun/mailgun-php": "^3.0",
 		"nyholm/psr7": "^1.2",
