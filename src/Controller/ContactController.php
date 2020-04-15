@@ -54,6 +54,20 @@ class ContactController extends AbstractController{
 	}
 
 	/**
+	 * @Route("/admin/organization/contact/edit/{encodedUuid}", name="organization_edit_contact")
+	 */
+	public function edit(string $encodedUuid, OrganizationContactRepository $contactRepository, UuidEncoder $encoder){
+		$contact = $contactRepository->findOneByEncodedUuid($encodedUuid);
+		if(!$contact) return $this->redirectToRoute('organization_home');
+		return $this->render(
+			'admin/organization/contact/edit.html.twig',
+			[
+				'contact'=>$contact
+			]
+		);
+	}
+
+	/**
 	 * @Route("/admin/organization/{encodedUuid}/contact/create", name="organization_create_contact")
 	 */
 	public function create(Request $request, string $encodedUuid, OrganizationRepository $orgRepository, UuidEncoder $encoder){
@@ -89,5 +103,40 @@ class ContactController extends AbstractController{
 			$manager->flush();
 		}
 		return $this->redirectToRoute('organization_contact_list', ['encodedUuid'=>isset($organization) ? $encoder->encode($organization->getUuid()) : '0']);
+	}
+
+	/**
+	 * @Route("/admin/organization/contact/update/{encodedUuid}", name="organization_update_contact")
+	 */
+	public function update(Request $request, string $encodedUuid, OrganizationContactRepository $contactRepository, UuidEncoder $encoder){
+		/**
+		 * @var OrganizationContact|null
+		 */
+		$contact = $contactRepository->findOneByEncodedUuid($encodedUuid);
+		if(!$contact) return $this->redirectToRoute('organization_home');
+		$name = $request->request->get('name');
+		$title = $request->request->get('title');
+		$email = $request->request->get('email');
+		$mobile = $request->request->get('mobile');
+		$work = $request->request->get('work');
+		$home = $request->request->get('home');
+		$primary = $request->request->get('primary', false);
+		$notify_email = $request->request->get('notify_email', false);
+		$notify_mobile = $request->request->get('notify_mobile', false);
+		if(!empty($name) && !empty($email)){
+			$contact->setName($name);
+			$contact->setJobTitle($title);
+			$contact->setEmail($email);
+			$contact->setMobilePhone($mobile);
+			$contact->setWorkPhone($work);
+			$contact->setHomePhone($home);
+			$contact->setIsPrimary($primary);
+			$contact->setNotifyViaEmail($notify_email);
+			$contact->setNotifyViaMobile($notify_mobile);
+			$manager = $this->getDoctrine()->getManager();
+			$manager->persist($contact);
+			$manager->flush();
+		}
+		return $this->redirectToRoute('organization_contact_list', ['encodedUuid'=>$encoder->encode($contact->getOrganization()->getUuid())]);
 	}
 }
