@@ -31,17 +31,23 @@ class WebhookController extends AbstractController
          * todo: notify related org contacts after saving data
          */
         $data = json_decode($request->getContent());
+
+        // we have a leadgen object
         if ($data->object == 'page' && $data->entry[0]->changes[0]->field == 'leadgen') {
             $leadgen = get_object_vars($data->entry[0]->changes[0]->value);
             $page_id = $leadgen['page_id'];
             // todo try and find the page in the crm from this id
+            if ($organization = $organizationRepository->findOneBy(['facebookPage' => $page_id])) {
+                $organizationLeadService->createLeadFromArray(
+                    $organization,
+                    $leadgen, // fallback to storing leadgen until we can retreive lead details
+                    $entityManagerInterface
+                );
+            } else {
+                return new JsonResponse('unable to find organization', 404);
+            }
         }
 
-        $organizationLeadService->createLeadFromArray(
-            $organizationRepository->findOneByEncodedUuid('3hSX7N1OSn6zyt9XgjqGvH'), // hardcded for now
-            $leadgen, // fallback to storing leadgen until we can retreive lead details
-            $entityManagerInterface
-        );
         // }
 
         /**
@@ -52,13 +58,8 @@ class WebhookController extends AbstractController
         $challenge = $request->query->get('hub_challenge');
         $verify_token = $request->query->get('hub_verify_token');
         if ($verify_token === 'funnelkake-crm') {
-            // error_log('request: ' . $request);
-            // error_log('token matches');
-            // error_log('challenge: ' . $challenge);
             return new Response($challenge);
         } else {
-            // error_log('token mismatch');
-            // error_log('request: ' . $request);
             return new JsonResponse('error');
         }
     }
