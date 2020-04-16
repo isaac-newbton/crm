@@ -43,6 +43,11 @@ console.log('Successfully subscribed page', response);
 function myFacebookLogin() {
 FB.login(function (response) {
 console.log('Successfully logged in', response);
+/**
+ * ! todo: resonse.accessToken should be stored somewhere (env?), this is what is used to fetch lead data from the leadgen object 
+ */
+
+
 FB.api('/me/accounts', function (response) {
 console.log('Successfully retrieved pages', response);
 var pages = response.data;
