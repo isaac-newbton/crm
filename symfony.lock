@@ -87,6 +87,9 @@
     "facebook/graph-sdk": {
         "version": "5.7.0"
     },
+    "facebook/php-business-sdk": {
+        "version": "6.0.4"
+    },
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },

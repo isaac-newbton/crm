@@ -7,6 +7,7 @@
 		"ext-gmp": "*",
 		"ext-iconv": "*",
 		"facebook/graph-sdk": "^5.7",
+		"facebook/php-business-sdk": "^6.0",
 		"kriswallsmith/buzz": "^1.1",
 		"mailgun/mailgun-php": "^3.0",
 		"nyholm/psr7": "^1.2",
