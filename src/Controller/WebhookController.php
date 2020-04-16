@@ -32,6 +32,30 @@ class WebhookController extends AbstractController
      */
     public function facebook(Request $request, string $orgEncodedUuid, string $orgApiKey, OrganizationRepository $orgRepository, OrganizationApiService $orgApiService, OrganizationLeadService $orgLeadService, UuidEncoder $uuidEncoder)
     {
+        $entry = $request->request->get('entry');
+        if(!empty($entry)){
+            $leadgens = [];
+            foreach($entry as $entryItem){
+                if(isset($entryItem['changes']) && !empty($entryItem['changes'])){
+                    foreach($entryItem['changes'] as $change){
+                        if('leadgen'===$change['field'] && isset($change['value']) && !empty($change['value'])){
+                            $leadgens[] = $change['value'];
+                        }
+                    }
+                }
+            }
+
+            if(!empty($leadgens)){
+                $entityManager = $this->getDoctrine()->getManager();
+                foreach($leadgens as $leadgen){
+                    if($organization = $orgRepository->findOneBy(['facebookPage'=>$leadgen['page_id']])){
+                        #TODO get data from $leadgen['leadgen_id']
+                        $leadgen_data = [];
+                        $lead = $orgLeadService->createLeadFromArray($organization, array_merge($leadgen_data, ['_lead_source'=>'facebook']), $entityManager);
+                    }
+                }
+            }
+        }
         return new JsonResponse(['request' => $request->request->all()], 200);
     }
 
@@ -46,7 +70,7 @@ class WebhookController extends AbstractController
         if (!$orgApiService->keyIsValid($organization, $orgApiKey)) {
             return new JsonResponse(['error' => 'invalid key'], 401);
         }
-        if (!$lead = $orgLeadService->createLeadFromArray($organization, $request->query->all(), $this->getDoctrine()->getManager())) {
+        if (!$lead = $orgLeadService->createLeadFromArray($organization, array_merge($request->query->all(), ['_lead_source'=>'retreaver']), $this->getDoctrine()->getManager())) {
             return new JsonResponse(['error' => 'lead creation failed'], 401);
         }
         return new JsonResponse(['lead' => $uuidEncoder->encode($lead->getUuid())], 200);
@@ -63,7 +87,7 @@ class WebhookController extends AbstractController
         if (!$orgApiService->keyIsValid($organization, $orgApiKey)) {
             return new JsonResponse(['error' => 'invalid key'], 401);
         }
-        if (!$lead = $orgLeadService->createLeadFromArray($organization, $request->request->all(), $this->getDoctrine()->getManager())) {
+        if (!$lead = $orgLeadService->createLeadFromArray($organization, array_merge($request->request->all(), ['_lead_source'=>'custom']), $this->getDoctrine()->getManager())) {
             return new JsonResponse(['error' => 'lead creation failed'], 401);
         }
         return new JsonResponse(['lead' => $uuidEncoder->encode($lead->getUuid())], 200);

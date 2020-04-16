@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Service\EmailService;
+use App\Service\FacebookService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,6 +34,13 @@ class SuperAdminController extends AbstractController{
 			'sent' => $sent ? var_export($sent, true) : false
 		]);
 
+	}
+
+	/**
+	 * @Route("/super/facebook_access", name="super_facebook_access")
+	 */
+	public function fbAccess(FacebookService $fbService){
+		return new Response("<html><body>Path = " . $fbService->getAccessTokenPath() . "<br>Token = " . $fbService->getAccessToken() . "</body></html>", 200);
 	}
 
 }
