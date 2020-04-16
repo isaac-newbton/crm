@@ -17,7 +17,7 @@ class WebhookController extends AbstractController
 {
 
     /**
-     * @Route("/facebook/webhook")
+     * @Route("/webhook/facebook")
      * 
      * This endpoint is a catch all from facebook
      */
