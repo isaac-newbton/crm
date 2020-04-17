@@ -77,6 +77,9 @@ class FacebookService{
 			$entityManager->persist($fbLeadgen);
 			$entityManager->flush();
 		}
+		if(isset($json)){
+			$this->filesystem->dumpFile('leadgen_data.txt', $json);
+		}
 		return $json ?? false;
 	}
 }

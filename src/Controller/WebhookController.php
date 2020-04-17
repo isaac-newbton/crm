@@ -24,7 +24,7 @@ class WebhookController extends AbstractController
 
     /**
      * @Route("/webhook/facebook")
-     * 
+     *
      * This endpoint is a catch all from facebook
      */
     public function facebookAuth(
@@ -34,7 +34,7 @@ class WebhookController extends AbstractController
         EntityManagerInterface $entityManagerInterface
     ) {
 
-        /** 
+        /**
          * todo: if we are recieving a leadgen object:
          * todo: token ($token) returned from previous step stored (somewhere)
          * todo: retreive the lead details and store in database - fallback to store leadgen object in database
@@ -121,9 +121,9 @@ class WebhookController extends AbstractController
     }
 
     /**
-     * @Route("/webhook/facebook/new_lead/{orgEncodedUuid}/{orgApiKey}", name="webhook_facebook_new_lead")
+     * @Route("/webhook/facebook/new_lead", name="webhook_facebook_new_lead")
      */
-    public function facebook(Request $request, string $orgEncodedUuid, string $orgApiKey, OrganizationRepository $orgRepository, OrganizationApiService $orgApiService, OrganizationLeadService $orgLeadService, UuidEncoder $uuidEncoder, FacebookService $fbService)
+    public function facebook(Request $request, OrganizationRepository $orgRepository, OrganizationLeadService $orgLeadService, FacebookService $fbService)
     {
         $entry = $request->request->get('entry');
         if(!empty($entry)){
@@ -153,11 +153,7 @@ class WebhookController extends AbstractController
                         }
                         $entityManager->persist($fbLeadgen);
                         $entityManager->flush();
-                    }
-                    if($organization = $orgRepository->findOneBy(['facebookPage'=>$leadgen['page_id']])){
-                        #TODO get data from $leadgen['leadgen_id']
-                        $leadgen_data = [];
-                        $lead = $orgLeadService->createLeadFromArray($organization, array_merge($leadgen_data, ['_lead_source'=>'facebook']), $entityManager);
+                        $fbService->attemptLeadgenLead($fbLeadgen, $entityManager, $orgRepository);
                     }
                 }
             }
