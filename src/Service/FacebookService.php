@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\FacebookLeadgen;
 use App\Repository\OrganizationRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Facebook\Facebook;
 use FacebookAds\Api;
 use FacebookAds\Logger\CurlLogger;
 use FacebookAds\Object\Lead as FbLead;
@@ -31,6 +32,14 @@ class FacebookService{
 			$this->filesystem->dumpFile($this->accessTokenPath, 'ACCESS_TOKEN_MISSING');
 		}
 		$this->accessToken = file_get_contents($this->accessTokenPath);
+	}
+
+	public function getFacebook(){
+		return new Facebook([
+			'app_id'=>$_ENV['FB_APP_ID'],
+			'app_secret'=>$_ENV['FB_APP_SECRET'],
+			'default_graph_version'=>$_ENV['FB_GRAPH_VERSION']
+		]);
 	}
 
 	public function getAccessTokenPath(){

@@ -47,6 +47,11 @@ class Organization
      */
     private $facebookLeadgens;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $facebookPageAccessToken;
+
     public function __construct()
     {
         $this->uuid = Uuid::uuid4();
@@ -200,6 +205,18 @@ class Organization
                 $facebookLeadgen->setOrganization(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFacebookPageAccessToken(): ?string
+    {
+        return $this->facebookPageAccessToken;
+    }
+
+    public function setFacebookPageAccessToken(?string $facebookPageAccessToken): self
+    {
+        $this->facebookPageAccessToken = $facebookPageAccessToken;
 
         return $this;
     }

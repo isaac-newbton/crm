@@ -40,7 +40,16 @@ class WebhookController extends AbstractController
          * todo: retreive the lead details and store in database - fallback to store leadgen object in database
          * todo: notify related org contacts after saving data
          */
+
+        $challenge = $request->query->get('hub_challenge');
+        $verify_token = $request->query->get('hub_verify_token');
+        if(isset($_ENV['FB_HUB_VERIFY_TOKEN']) && $verify_token===$_ENV['FB_HUB_VERIFY_TOKEN']){
+            return new Response($challenge);
+        }
+
         $data = json_decode($request->getContent());
+
+        if(!is_object($data) || empty($data)) return new Response('Empty request', 400);
 
         // we have a leadgen object
         if ($data->object == 'page' && $data->entry[0]->changes[0]->field == 'leadgen') {
@@ -89,26 +98,6 @@ class WebhookController extends AbstractController
          * todo: check if token exists (somewheere) and ping facebook to refresh
          * todo: user logins to facebook and authorizes app to manage pages
          */
-        $challenge = $request->query->get('hub_challenge');
-        $verify_token = $request->query->get('hub_verify_token');
-        if ($verify_token === 'funnelkake-crm') {
-            return new Response($challenge);
-        } else {
-            return new JsonResponse('error');
-        }
-    }
-
-    /**
-     * @Route("/webhook/facebook_subscription", name="webhook_facebook_subscription")
-     */
-    public function facebookSubscription(Request $request){
-        $challenge = $request->query->get('hub_challenge');
-        $verify_token = $request->query->get('hub_verify_token');
-        if(isset($_ENV['FB_HUB_VERIFY_TOKEN']) && $verify_token===$_ENV['FB_HUB_VERIFY_TOKEN']){
-            return new Response($challenge);
-        }else{
-            return new Response("Verify token \"$verify_token\" invalid", 401);
-        }
     }
 
     /**
