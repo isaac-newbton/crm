@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Doctrine\UuidEncoder;
+use App\Entity\FacebookLeadgen;
 use App\Repository\OrganizationRepository;
+use App\Service\FacebookService;
 use App\Service\OrganizationApiService;
 use App\Service\OrganizationLeadService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -121,7 +123,7 @@ class WebhookController extends AbstractController
     /**
      * @Route("/webhook/facebook/new_lead/{orgEncodedUuid}/{orgApiKey}", name="webhook_facebook_new_lead")
      */
-    public function facebook(Request $request, string $orgEncodedUuid, string $orgApiKey, OrganizationRepository $orgRepository, OrganizationApiService $orgApiService, OrganizationLeadService $orgLeadService, UuidEncoder $uuidEncoder)
+    public function facebook(Request $request, string $orgEncodedUuid, string $orgApiKey, OrganizationRepository $orgRepository, OrganizationApiService $orgApiService, OrganizationLeadService $orgLeadService, UuidEncoder $uuidEncoder, FacebookService $fbService)
     {
         $entry = $request->request->get('entry');
         if(!empty($entry)){
@@ -139,6 +141,19 @@ class WebhookController extends AbstractController
             if(!empty($leadgens)){
                 $entityManager = $this->getDoctrine()->getManager();
                 foreach($leadgens as $leadgen){
+                    if(isset($leadgen['leadgen_id']) && is_numeric($leadgen['leadgen_id'])){
+                        $fbLeadgen = new FacebookLeadgen();
+                        $fbLeadgen->setLeadgenId($leadgen['leadgen_id']);
+                        if(isset($leadgen['page_id']) && is_numeric($leadgen['page_id'])){
+                            $fbLeadgen->setFacebookPage($leadgen['page_id']);
+                            if($organization = $orgRepository->findOneBy(['facebookPage'=>$leadgen['page_id']])){
+                                $organization->addFacebookLeadgen($fbLeadgen);
+                                $entityManager->persist($organization);
+                            }
+                        }
+                        $entityManager->persist($fbLeadgen);
+                        $entityManager->flush();
+                    }
                     if($organization = $orgRepository->findOneBy(['facebookPage'=>$leadgen['page_id']])){
                         #TODO get data from $leadgen['leadgen_id']
                         $leadgen_data = [];

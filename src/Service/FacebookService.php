@@ -2,6 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\FacebookLeadgen;
+use App\Repository\OrganizationRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use FacebookAds\Api;
 use FacebookAds\Logger\CurlLogger;
 use FacebookAds\Object\Lead as FbLead;
@@ -48,5 +51,32 @@ class FacebookService{
 		return json_encode(
 			$fbLead->getSelf($fields, $params)->exportAllData()
 		);
+	}
+
+	public function attemptLeadgenLead(FacebookLeadgen $fbLeadgen, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository){
+		if(null==$fbLeadgen->getCompleted()){
+			$fbLeadgen->setAttempts($fbLeadgen->getAttempts() + 1);
+			if(null==$fbLeadgen->getOrganization()){
+				//attempt to match with an org via page_id
+				if(is_numeric($fbLeadgen->getFacebookPage())){
+					if($foundOrg = $orgRepository->findOneBy(['facebookPage'=>$fbLeadgen->getFacebookPage()])){
+						$foundOrg->addFacebookLeadgen($fbLeadgen);
+						$entityManager->persist($foundOrg);
+					}
+				}
+			}
+			if(null!=$organization = $fbLeadgen->getOrganization()){
+				$api = Api::init($this->appId, $this->appSecret, $this->accessToken);
+				$api->setLogger(new CurlLogger());
+				$fields = [];
+				$params = [];
+				$fbLead = new FbLead($fbLeadgen->getLeadgenId());
+				$data = $fbLead->getSelf($fields, $params)->exportAllData();
+				$json = json_encode($data, JSON_PRETTY_PRINT);
+			}
+			$entityManager->persist($fbLeadgen);
+			$entityManager->flush();
+		}
+		return $json ?? false;
 	}
 }
