@@ -84,6 +84,9 @@
     "egulias/email-validator": {
         "version": "2.1.17"
     },
+    "facebook/graph-sdk": {
+        "version": "5.7.0"
+    },
     "facebook/php-business-sdk": {
         "version": "6.0.4"
     },
@@ -232,6 +235,18 @@
         },
         "files": [
             "./config/packages/sensio_framework_extra.yaml"
+        ]
+    },
+    "symfony/apache-pack": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "1.0",
+            "ref": "410b9325a37ef86f1e47262c61738f6202202bca"
+        },
+        "files": [
+            "public/.htaccess"
         ]
     },
     "symfony/asset": {
