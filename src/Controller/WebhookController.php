@@ -99,6 +99,19 @@ class WebhookController extends AbstractController
     }
 
     /**
+     * @Route("/webhook/facebook_subscription", name="webhook_facebook_subscription")
+     */
+    public function facebookSubscription(Request $request){
+        $challenge = $request->query->get('hub_challenge');
+        $verify_token = $request->query->get('hub_verify_token');
+        if(isset($_ENV['FB_HUB_VERIFY_TOKEN']) && $verify_token===$_ENV['FB_HUB_VERIFY_TOKEN']){
+            return new Response($challenge);
+        }else{
+            return new Response("Verify token \"$verify_token\" invalid", 401);
+        }
+    }
+
+    /**
      * @Route("/facebook/auth")
      */
     public function fbAuthorizeApp(Request $request)
