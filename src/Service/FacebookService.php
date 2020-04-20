@@ -5,6 +5,8 @@ namespace App\Service;
 use App\Entity\FacebookLeadgen;
 use App\Repository\OrganizationRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Facebook\Exceptions\FacebookResponseException;
+use Facebook\Exceptions\FacebookSDKException;
 use Facebook\Facebook;
 use FacebookAds\Api;
 use FacebookAds\Logger\CurlLogger;
@@ -23,6 +25,11 @@ class FacebookService{
 	 */
 	protected $filesystem;
 
+	/**
+	 * @var Facebook|null
+	 */
+	protected $facebook;
+
 	public function __construct(){
 		$this->appId = $_ENV['FB_APP_ID'];
 		$this->appSecret = $_ENV['FB_APP_SECRET'];
@@ -32,14 +39,26 @@ class FacebookService{
 			$this->filesystem->dumpFile($this->accessTokenPath, 'ACCESS_TOKEN_MISSING');
 		}
 		$this->accessToken = file_get_contents($this->accessTokenPath);
-	}
-
-	public function getFacebook(){
-		return new Facebook([
+		$this->facebook = new Facebook([
 			'app_id'=>$_ENV['FB_APP_ID'],
 			'app_secret'=>$_ENV['FB_APP_SECRET'],
 			'default_graph_version'=>'v'.$_ENV['FB_GRAPH_VERSION']
 		]);
+	}
+
+	public function getFacebook(){
+		return $this->facebook;
+	}
+
+	public function getAccounts(){
+		try{
+			return $this->facebook->get('/me/accounts', $this->accessToken);
+		}catch(FacebookResponseException $e){
+			echo "Graph Error: " . $e->getMessage();
+		}catch(FacebookSDKException $e){
+			echo "SDK Error: " . $e->getMessage();
+		}
+		return null;
 	}
 
 	public function getAccessTokenPath(){

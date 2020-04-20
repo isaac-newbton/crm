@@ -25,10 +25,9 @@ class FacebookController extends AbstractController{
 		$loginUrl = $helper->getLoginUrl($callbackUrl, $permissions);
 
 		try{
-			$accountsResponse = $facebook->get('/me/accounts', $fbService->getAccessToken());
-			$accounts = $accountsResponse->getDecodedBody();
+			if($accountsResponse = $fbService->getAccounts()) $accounts = $accountsResponse->getDecodedBody();
 		}catch(FacebookSDKException $e){
-			
+
 		}
 
 		return $this->render('admin/facebook/login.html.twig', [
