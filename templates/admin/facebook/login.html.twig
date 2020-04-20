@@ -1,5 +1,39 @@
 {% extends "base.html.twig" %}
 
 {% block body %}
+	{% if fbError %}
+		<p style="color:red">There was an error connecting to Facebook. Logging in again may solve it.<br><em>{{ fbError }}</em></p>
+	{% endif %}
 	<a href="{{ loginUrl }}">Log in with Facebook</a>
+	{% if accounts %}
+		<p>You are connected to Facebook with a global access token using an account that can manage the following pages:</p>
+		<ul>
+			{% for account in accounts %}
+				<li>
+					<table>
+						<tbody>
+							<tr>
+								<th>Name</th>
+								<td>
+									{{ account.name }}
+								</td>
+							</tr>
+							<tr>
+								<th>ID</th>
+								<td>
+									{{ account.id }}
+								</td>
+							</tr>
+							<tr>
+								<th>Token</th>
+								<td>
+									{{ account.access_token }}
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</li>
+			{% endfor %}
+		</ul>
+	{% endif %}
 {% endblock %}

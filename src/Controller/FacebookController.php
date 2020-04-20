@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\Service\FacebookService;
+use Facebook\Exceptions\FacebookAuthenticationException;
+use Facebook\Exceptions\FacebookAuthorizationException;
 use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Exceptions\FacebookSDKException;
+use Facebook\Exceptions\FacebookServerException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -20,8 +23,18 @@ class FacebookController extends AbstractController{
 		$permissions = ['manage_pages'];
 		$callbackUrl = htmlspecialchars($this->generateUrl('facebook_login_callback', [], UrlGeneratorInterface::ABSOLUTE_URL));
 		$loginUrl = $helper->getLoginUrl($callbackUrl, $permissions);
+
+		try{
+			$accountsResponse = $facebook->get('/me/accounts', $fbService->getAccessToken());
+			$accounts = $accountsResponse->getDecodedBody();
+		}catch(FacebookSDKException $e){
+			
+		}
+
 		return $this->render('admin/facebook/login.html.twig', [
-			'loginUrl'=>$loginUrl
+			'loginUrl'=>$loginUrl,
+			'fbError'=>isset($e) ? $e->getMessage() : false,
+			'accounts'=>isset($accounts) ? $accounts['data'] : false
 		]);
 	}
 
