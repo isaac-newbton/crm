@@ -38,7 +38,7 @@ class FacebookService{
 		return new Facebook([
 			'app_id'=>$_ENV['FB_APP_ID'],
 			'app_secret'=>$_ENV['FB_APP_SECRET'],
-			'default_graph_version'=>$_ENV['FB_GRAPH_VERSION']
+			'default_graph_version'=>'v'.$_ENV['FB_GRAPH_VERSION']
 		]);
 	}
 
@@ -47,7 +47,15 @@ class FacebookService{
 	}
 
 	public function getAccessToken(){
+		if($this->filesystem->exists($this->accessTokenPath)){
+			$this->accessToken = file_get_contents($this->accessTokenPath);
+		}
 		return $this->accessToken;
+	}
+
+	public function setAccessToken(string $accessToken){
+		$this->accessToken = $accessToken;
+		$this->filesystem->dumpFile($this->accessTokenPath, $accessToken);
 	}
 
 	#https://developers.facebook.com/docs/marketing-api/guides/lead-ads/retrieving#webhooks

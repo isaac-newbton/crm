@@ -1,0 +1,40 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>Facebook | {{ organization.name }}</h1>
+	<p><a href="{{ path('organization_home') }}">-Cancel</a></p>
+	<p>Use this page to connect an organization ({{ organization.name }}) to a Facebook page.</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Token</th>
+				<th>Value</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>
+					Global
+				</td>
+				<td style="max-width:200px;overflow-x:auto">
+					{{ globalAccessToken }}
+				</td>
+				<td>
+					status				
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Page {{ organization.facebookPage }}
+				</td>
+				<td style="max-width:200px;overflow-x:auto">
+					{{ organization.facebookPageAccessToken }}
+				</td>
+				<td>
+					page status
+				</td>
+			</tr>
+		</tbody>
+	</table>
+{% endblock %}

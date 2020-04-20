@@ -15,13 +15,12 @@ class FacebookController extends AbstractController{
 	 * @Route("/facebook/login", name="facebook_login")
 	 */
 	public function login(FacebookService $fbService){
-		session_start();
 		$facebook = $fbService->getFacebook();
 		$helper = $facebook->getRedirectLoginHelper();
 		$permissions = ['manage_pages'];
 		$callbackUrl = htmlspecialchars($this->generateUrl('facebook_login_callback', [], UrlGeneratorInterface::ABSOLUTE_URL));
 		$loginUrl = $helper->getLoginUrl($callbackUrl, $permissions);
-		return $this->render('', [
+		return $this->render('admin/facebook/login.html.twig', [
 			'loginUrl'=>$loginUrl
 		]);
 	}
@@ -30,7 +29,6 @@ class FacebookController extends AbstractController{
 	 * @Route("/facebook/login_callback", name="facebook_login_callback")
 	 */
 	public function loginCallback(FacebookService $fbService){
-		session_start();
 		$facebook = $fbService->getFacebook();
 		$helper = $facebook->getRedirectLoginHelper();
 
@@ -75,5 +73,8 @@ class FacebookController extends AbstractController{
 		}
 
 		$_SESSION['fb_access_token'] = (string)$accessToken;
+		$fbService->setAccessToken((string)$accessToken);
+
+		return $this->redirectToRoute('facebook_login');
 	}
 }

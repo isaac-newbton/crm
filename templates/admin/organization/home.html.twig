@@ -35,7 +35,13 @@
 						{{ uuid_encode(organization.uuid) }}
 					</td>
 					<td>
-						{{ organization.facebookPage }}
+						<a href="{{ path('organization_facebook', {encodedUuid:uuid_encode(organization.uuid)}) }}">
+							{% if organization.facebookPage is empty %}
+								Connect
+							{% else %}
+								{{ organization.facebookPage }}
+							{% endif %}
+						</a>
 					</td>
 					<td>
 						<a href="{{ path('organization_delete', {encodedUuid:uuid_encode(organization.uuid)}) }}">Delete</a>

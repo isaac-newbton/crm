@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Doctrine\UuidEncoder;
 use App\Entity\Organization;
 use App\Repository\OrganizationRepository;
+use App\Service\FacebookService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -112,5 +113,20 @@ class OrganizationController extends AbstractController
 				'organization' => $organization
 			]);
 		}
+	}
+
+	/**
+	 * @Route("/admin/organization/{encodedUuid}/facebook", name="organization_facebook")
+	 */
+	public function facebook(string $encodedUuid, OrganizationRepository $orgRepository, FacebookService $fbService){
+		$organization = $orgRepository->findOneByEncodedUuid($encodedUuid);
+		if(!$organization) return $this->redirectToRoute('organization_home');
+		return $this->render(
+			'admin/organization/facebook.html.twig',
+			[
+				'organization'=>$organization,
+				'globalAccessToken'=>$fbService->getAccessToken()
+			]
+		);
 	}
 }
