@@ -52,7 +52,7 @@ class FacebookService{
 
 	public function getAccounts(){
 		try{
-			return $this->facebook->get('/me/accounts', $this->accessToken);
+			return $this->facebook->get('/me/accounts?limit=600', $this->accessToken);
 		}catch(FacebookResponseException $e){
 			echo "Graph Error: " . $e->getMessage();
 		}catch(FacebookSDKException $e){
