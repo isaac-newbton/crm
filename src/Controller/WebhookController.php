@@ -31,7 +31,8 @@ class WebhookController extends AbstractController
         Request $request,
         OrganizationLeadService $organizationLeadService,
         OrganizationRepository $organizationRepository,
-        EntityManagerInterface $entityManagerInterface
+        EntityManagerInterface $entityManagerInterface,
+        FacebookService $fbService
     ) {
 
         /**
@@ -43,8 +44,12 @@ class WebhookController extends AbstractController
 
         $challenge = $request->query->get('hub_challenge');
         $verify_token = $request->query->get('hub_verify_token');
-        if(isset($_ENV['FB_HUB_VERIFY_TOKEN']) && $verify_token===$_ENV['FB_HUB_VERIFY_TOKEN']){
-            return new Response($challenge);
+        if(null!==$challenge && null!==$verify_token){
+            if(isset($_ENV['FB_HUB_VERIFY_TOKEN']) && $verify_token===$_ENV['FB_HUB_VERIFY_TOKEN']){
+                return new Response($challenge);
+            }else{
+                return new Response('Challenge verification failed', 401);
+            }
         }
 
         $data = json_decode($request->getContent());
@@ -52,17 +57,52 @@ class WebhookController extends AbstractController
         if(!is_object($data) || empty($data)) return new Response('Empty request', 400);
 
         // we have a leadgen object
+
+        if(!empty($data->entry)){
+            $leadgens = [];
+            foreach($data->entry as $entryItem){
+                if(isset($entryItem['changes']) && !empty($entryItem['changes'])){
+                    foreach($entryItem['changes'] as $change){
+                        if('leadgen'===$change['field'] && isset($change['value']) && !empty($change['value'])){
+                            $leadgens[] = $change['value'];
+                        }
+                    }
+                }
+            }
+
+            if(!empty($leadgens)){
+                $entityManager = $this->getDoctrine()->getManager();
+                foreach($leadgens as $leadgen){
+                    if(isset($leadgen['leadgen_id']) && is_numeric($leadgen['leadgen_id'])){
+                        $fbLeadgen = new FacebookLeadgen();
+                        $fbLeadgen->setLeadgenId($leadgen['leadgen_id']);
+                        if(isset($leadgen['page_id']) && is_numeric($leadgen['page_id'])){
+                            $fbLeadgen->setFacebookPage($leadgen['page_id']);
+                            if($organization = $organizationRepository->findOneBy(['facebookPage'=>$leadgen['page_id']])){
+                                $organization->addFacebookLeadgen($fbLeadgen);
+                                $entityManager->persist($organization);
+                            }
+                        }
+                        $entityManager->persist($fbLeadgen);
+                        $entityManager->flush();
+                        $json = $fbService->attemptLeadgenLead($fbLeadgen, $entityManager, $organizationRepository);
+                        return new JsonResponse(['result'=>$json ? json_decode($json, true) : false]);
+                    }
+                }
+            }
+        }
+        return new JsonResponse(['request' => $request->request->all()], 200);
+
         if ($data->object == 'page' && $data->entry[0]->changes[0]->field == 'leadgen') {
             $leadgen = get_object_vars($data->entry[0]->changes[0]->value);
             $page_id = $leadgen['page_id'];
-
             $lead_data = $leadgen; // default
             // try and find the page in the crm from this id
             try {
 
-                $access_token = 'EAADV7UWSb4sBAHBDZBLmCBjkFtNflA7jcPcGZB0tRaX5Yt3sViTCr0RWw6MV50g1eQzPkVGJSEVFEtplIvvdcyewP6z6kxgpeDF586ZBuQ1zi2f4CdFXn93XeYFAoV52fuUF5MZCvBq41Rk2yeU4aNn2ZBbZBVZCNZBQyCZB8wFcrembB7200cCByvD0PPyQ8f1ku4SUfw2EZCiAZDZD';
-                $app_secret = 'funnelkake-crm';
-                $app_id = '235215051190155';
+                $access_token = $fbService->getAccessToken();
+                $app_secret = $_ENV['FB_APP_SECRET'];
+                $app_id = $_ENV['FB_APP_ID'];
                 $id = $leadgen['leadgen_id'];
 
                 $api = Api::init($app_id, $app_secret, $access_token);
