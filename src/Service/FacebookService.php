@@ -114,7 +114,7 @@ class FacebookService{
 			$entityManager->flush();
 		}
 		if(isset($json)){
-			$this->filesystem->dumpFile('leadgen_data.txt', $json);
+			$this->filesystem->dumpFile('facebook/leadgen_data.txt', $json);
 		}
 		return $json ?? false;
 	}
