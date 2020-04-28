@@ -45,6 +45,8 @@ class WebhookController extends AbstractController
          */
 
         $logfilePath = 'facebook/webhook_log.txt';
+        $filesystem->dumpFile($logfilePath, __LINE__);
+
         $challenge = $request->query->get('hub_challenge');
         $verify_token = $request->query->get('hub_verify_token');
         if(null!==$challenge && null!==$verify_token){
