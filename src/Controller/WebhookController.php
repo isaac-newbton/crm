@@ -14,6 +14,7 @@ use FacebookAds\Api;
 use FacebookAds\Logger\CurlLogger;
 use FacebookAds\Object\Lead;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,7 +33,8 @@ class WebhookController extends AbstractController
         OrganizationLeadService $organizationLeadService,
         OrganizationRepository $organizationRepository,
         EntityManagerInterface $entityManagerInterface,
-        FacebookService $fbService
+        FacebookService $fbService,
+        Filesystem $filesystem
     ) {
 
         /**
@@ -42,6 +44,7 @@ class WebhookController extends AbstractController
          * todo: notify related org contacts after saving data
          */
 
+        $logfilePath = 'facebook/webhook_log.txt';
         $challenge = $request->query->get('hub_challenge');
         $verify_token = $request->query->get('hub_verify_token');
         if(null!==$challenge && null!==$verify_token){
@@ -54,11 +57,16 @@ class WebhookController extends AbstractController
 
         $data = json_decode($request->getContent());
 
+        $filesystem->dumpFile($logfilePath, __LINE__);
+
         if(!is_object($data) || empty($data)) return new Response('Empty request', 400);
 
         // we have a leadgen object
 
         if(!empty($data->entry)){
+
+            $filesystem->dumpFile($logfilePath, __LINE__);
+
             $leadgens = [];
             foreach($data->entry as $entryItem){
                 if(isset($entryItem['changes']) && !empty($entryItem['changes'])){
@@ -70,7 +78,12 @@ class WebhookController extends AbstractController
                 }
             }
 
+            $filesystem->dumpFile($logfilePath, __LINE__);
+
             if(!empty($leadgens)){
+
+                $filesystem->dumpFile($logfilePath, __LINE__);
+
                 $entityManager = $this->getDoctrine()->getManager();
                 foreach($leadgens as $leadgen){
                     if(isset($leadgen['leadgen_id']) && is_numeric($leadgen['leadgen_id'])){
@@ -86,11 +99,17 @@ class WebhookController extends AbstractController
                         $entityManager->persist($fbLeadgen);
                         $entityManager->flush();
                         $json = $fbService->attemptLeadgenLead($fbLeadgen, $entityManager, $organizationRepository);
+
+                        $filesystem->dumpFile($logfilePath, __LINE__);
+
                         return new JsonResponse(['result'=>$json ? json_decode($json, true) : false]);
                     }
                 }
             }
         }
+
+        $filesystem->dumpFile($logfilePath, __LINE__);
+
         return new JsonResponse(['request' => $request->request->all()], 200);
 
         if ($data->object == 'page' && $data->entry[0]->changes[0]->field == 'leadgen') {
