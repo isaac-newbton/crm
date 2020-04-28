@@ -67,10 +67,13 @@ class WebhookController extends AbstractController
 
         if(!empty($data->entry)){
 
-            $filesystem->dumpFile($logfilePath, __LINE__);
+            $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($data, true));
 
             $leadgens = [];
             foreach($data->entry as $entryItem){
+
+                $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($entryItem, true));
+
                 if(isset($entryItem['changes']) && !empty($entryItem['changes'])){
                     foreach($entryItem['changes'] as $change){
                         if('leadgen'===$change['field'] && isset($change['value']) && !empty($change['value'])){
@@ -80,11 +83,11 @@ class WebhookController extends AbstractController
                 }
             }
 
-            $filesystem->dumpFile($logfilePath, __LINE__);
+            $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($data, true));
 
             if(!empty($leadgens)){
 
-                $filesystem->dumpFile($logfilePath, __LINE__);
+                $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgens, true));
 
                 $entityManager = $this->getDoctrine()->getManager();
                 foreach($leadgens as $leadgen){
@@ -102,7 +105,7 @@ class WebhookController extends AbstractController
                         $entityManager->flush();
                         $json = $fbService->attemptLeadgenLead($fbLeadgen, $entityManager, $organizationRepository);
 
-                        $filesystem->dumpFile($logfilePath, __LINE__);
+                        $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgen, true));
 
                         return new JsonResponse(['result'=>$json ? json_decode($json, true) : false]);
                     }
