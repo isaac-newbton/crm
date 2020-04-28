@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\FacebookLeadgen;
+use App\Entity\Organization;
 use App\Repository\OrganizationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Facebook\Exceptions\FacebookResponseException;
@@ -87,6 +88,21 @@ class FacebookService{
 		return json_encode(
 			$fbLead->getSelf($fields, $params)->exportAllData()
 		);
+	}
+
+	public function subscribeToLeadgen(Organization $organization){
+		if($organization->getFacebookPage()){
+			if($organization->getFacebookPageAccessToken()){
+				return $this->facebook->post(
+					"/{$organization->getFacebookPage()}/subscribed_apps",
+					[
+						'subscribed_fields'=>'leadgen'
+					],
+					$organization->getFacebookPageAccessToken()
+				);
+			}
+		}
+		return false;
 	}
 
 	public function attemptLeadgenLead(FacebookLeadgen $fbLeadgen, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository){

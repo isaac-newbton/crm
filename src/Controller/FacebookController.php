@@ -20,7 +20,7 @@ class FacebookController extends AbstractController{
 	public function login(FacebookService $fbService){
 		$facebook = $fbService->getFacebook();
 		$helper = $facebook->getRedirectLoginHelper();
-		$permissions = ['manage_pages'];
+		$permissions = ['manage_pages', 'leads_retrieval'];
 		$callbackUrl = htmlspecialchars($this->generateUrl('facebook_login_callback', [], UrlGeneratorInterface::ABSOLUTE_URL));
 		$loginUrl = $helper->getLoginUrl($callbackUrl, $permissions);
 

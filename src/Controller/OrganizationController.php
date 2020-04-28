@@ -142,7 +142,7 @@ class OrganizationController extends AbstractController
 	/**
 	 * @Route("/admin/organization/{encodedUuid}/update/facebook", name="organization_update_facebook")
 	 */
-	public function updateFacebook(Request $request, string $encodedUuid, OrganizationRepository $orgRepository){
+	public function updateFacebook(Request $request, string $encodedUuid, OrganizationRepository $orgRepository, FacebookService $fbService){
 		if ($organization = $orgRepository->findOneByEncodedUuid($encodedUuid)) {
 			$facebook = explode(',', $request->request->get('facebook'));
 			if(2==count($facebook) && ''!=trim($facebook[0]) && ''!=trim($facebook[1])){
@@ -158,6 +158,9 @@ class OrganizationController extends AbstractController
 			$manager->persist($organization);
 			$manager->flush();
 		}
-		return $this->redirectToRoute('organization_home', ['_fragment' => $organization ? $organization->getId() : '0']);
+		return $this->redirectToRoute('organization_home', [
+			'_fragment' => $organization ? $organization->getId() : '0',
+			'leadgen' => ($organization && $fbService->subscribeToLeadgen($organization)) ? 'subscribed' : 'not_subscribed'
+		]);
 	}
 }
