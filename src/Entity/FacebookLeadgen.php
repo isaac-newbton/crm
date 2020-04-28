@@ -17,7 +17,7 @@ class FacebookLeadgen
     private $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string", length=255)
      */
     private $leadgenId;
 
@@ -47,7 +47,7 @@ class FacebookLeadgen
     private $organization;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $facebookPage;
 
@@ -57,6 +57,7 @@ class FacebookLeadgen
         $this->completed = null;
         $this->attempts = 0;
         $this->facebookPage = null;
+        $this->organization = null;
     }
 
     public function getId(): ?int
