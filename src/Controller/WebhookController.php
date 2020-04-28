@@ -91,12 +91,24 @@ class WebhookController extends AbstractController
 
                 $entityManager = $this->getDoctrine()->getManager();
                 foreach($leadgens as $leadgen){
-                    if(isset($leadgen->leadgen_id) && is_numeric($leadgen->leadgen_id)){
+
+                    $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgen, true));
+
+                    if(isset($leadgen->leadgen_id)){
+
+                        $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgen, true));
+
                         $fbLeadgen = new FacebookLeadgen();
                         $fbLeadgen->setLeadgenId($leadgen->leadgen_id);
-                        if(isset($leadgen->page_id) && is_numeric($leadgen->page_id)){
+                        if(isset($leadgen->page_id)){
+
+                            $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgen, true));
+
                             $fbLeadgen->setFacebookPage($leadgen->page_id);
                             if($organization = $organizationRepository->findOneBy(['facebookPage'=>$leadgen->page_id])){
+
+                                $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgen, true));
+
                                 $organization->addFacebookLeadgen($fbLeadgen);
                                 $entityManager->persist($organization);
                             }
