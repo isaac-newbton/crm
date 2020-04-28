@@ -74,10 +74,10 @@ class WebhookController extends AbstractController
 
                 $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($entryItem, true));
 
-                if(isset($entryItem['changes']) && !empty($entryItem['changes'])){
-                    foreach($entryItem['changes'] as $change){
-                        if('leadgen'===$change['field'] && isset($change['value']) && !empty($change['value'])){
-                            $leadgens[] = $change['value'];
+                if(isset($entryItem->changes) && !empty($entryItem->changes)){
+                    foreach($entryItem->changes as $change){
+                        if('leadgen'===$change->field && isset($change->value) && !empty($change->value)){
+                            $leadgens[] = $change->value;
                         }
                     }
                 }
@@ -91,12 +91,12 @@ class WebhookController extends AbstractController
 
                 $entityManager = $this->getDoctrine()->getManager();
                 foreach($leadgens as $leadgen){
-                    if(isset($leadgen['leadgen_id']) && is_numeric($leadgen['leadgen_id'])){
+                    if(isset($leadgen->leadgen_id) && is_numeric($leadgen->leadgen_id)){
                         $fbLeadgen = new FacebookLeadgen();
-                        $fbLeadgen->setLeadgenId($leadgen['leadgen_id']);
-                        if(isset($leadgen['page_id']) && is_numeric($leadgen['page_id'])){
-                            $fbLeadgen->setFacebookPage($leadgen['page_id']);
-                            if($organization = $organizationRepository->findOneBy(['facebookPage'=>$leadgen['page_id']])){
+                        $fbLeadgen->setLeadgenId($leadgen->leadgen_id);
+                        if(isset($leadgen->page_id) && is_numeric($leadgen->page_id)){
+                            $fbLeadgen->setFacebookPage($leadgen->page_id);
+                            if($organization = $organizationRepository->findOneBy(['facebookPage'=>$leadgen->page_id])){
                                 $organization->addFacebookLeadgen($fbLeadgen);
                                 $entityManager->persist($organization);
                             }
