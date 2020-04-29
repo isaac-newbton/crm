@@ -131,6 +131,8 @@ class FacebookService{
 		}
 		if(isset($json)){
 			$this->filesystem->dumpFile('facebook/leadgen_data.txt', $json);
+		}else{
+			$this->filesystem->dumpFile('facebook/leadgen_data_fail.txt', json_encode($fbLeadgen));
 		}
 		return $json ?? false;
 	}
