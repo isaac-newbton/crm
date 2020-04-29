@@ -107,6 +107,9 @@ class WebhookController extends AbstractController
 
                             $fbLeadgen->setFacebookPage($leadgen->page_id);
                             $organization = $organizationRepository->findOneBy(['facebookPage'=>(string)$leadgen->page_id]);
+
+                            $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($organization, true));
+
                             if($organization){
 
                                 $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($organization, true));
