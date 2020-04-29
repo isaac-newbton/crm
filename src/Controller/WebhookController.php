@@ -100,20 +100,21 @@ class WebhookController extends AbstractController
 
                         $fbLeadgen = new FacebookLeadgen();
                         $fbLeadgen->setLeadgenId($leadgen->leadgen_id);
+                        $entityManager->persist($fbLeadgen);
                         if(isset($leadgen->page_id)){
 
                             $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgen, true));
 
                             $fbLeadgen->setFacebookPage($leadgen->page_id);
-                            if($organization = $organizationRepository->findOneBy(['facebookPage'=>$leadgen->page_id])){
+                            $organization = $organizationRepository->findOneBy(['facebookPage'=>(string)$leadgen->page_id]);
+                            if($organization){
 
-                                $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgen, true));
+                                $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($organization, true));
 
                                 $organization->addFacebookLeadgen($fbLeadgen);
                                 $entityManager->persist($organization);
                             }
                         }
-                        $entityManager->persist($fbLeadgen);
                         $entityManager->flush();
                         $json = $fbService->attemptLeadgenLead($fbLeadgen, $entityManager, $organizationRepository);
 
