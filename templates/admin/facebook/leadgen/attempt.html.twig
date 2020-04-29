@@ -1,0 +1,17 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>Leadgen attempt on ID {{ leadgenId }}</h1>
+	<p><a href="{{ path('facebook_leadgen_view', {leadgenId:leadgenId}) }}">-Back</a></p>
+	<p>Found {{ leadgens|length }} leadgen{{ (1 != leadgens|length) ? 's' : '' }}</p>
+	<h2>Results</h2>
+	<pre>
+		{% if results is empty %}
+			EMPTY
+		{% else %}
+			{% for result in results %}
+				{{ result|raw }}
+			{% endfor %}
+		{% endif %}
+	</pre>
+{% endblock %}

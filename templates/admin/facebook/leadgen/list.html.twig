@@ -1,0 +1,52 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>{{ leadgens|length }} Leadgen{{ (1 != leadgens|length) ? 's' : '' }} found</h1>
+	<p><a href="{{ path('organization_home') }}">-Back</a></p>
+	{% if 0 < leadgens|length %}
+		<table>
+			<thead>
+				<tr>
+					<th>
+						Time
+					</th>
+					<th>
+						Organization
+					</th>
+					<th>
+						FB Page
+					</th>
+					<th>
+						Leadgen ID
+					</th>
+					<th>
+						Actions
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for leadgen in leadgens %}
+					<tr>
+						<td>
+							{{ leadgen.dt|date('M j Y g:i:sA') }}
+						</td>
+						<td>
+							{{ leadgen.organization ? leadgen.organization.name : 'N/A' }}
+						</td>
+						<td>
+							<a href="https://facebook.com/{{ leadgen.facebookPage }}">{{ leadgen.facebookPage }}</a>
+						</td>
+						<td>
+							{{ leadgen.leadgenId }}
+						</td>
+						<td>
+							<a href="{{ path('facebook_leadgen_view', {leadgenId:leadgen.leadgenId}) }}">View details</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>No leadgens are currently incomplete.</p>
+	{% endif %}
+{% endblock %}

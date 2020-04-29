@@ -10,6 +10,8 @@ use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Exceptions\FacebookSDKException;
 use Facebook\Facebook;
 use FacebookAds\Api;
+use FacebookAds\Http\Exception\AuthorizationException;
+use FacebookAds\Http\Exception\ServerException;
 use FacebookAds\Logger\CurlLogger;
 use FacebookAds\Object\Lead as FbLead;
 use Symfony\Component\Filesystem\Filesystem;
@@ -123,8 +125,14 @@ class FacebookService{
 				$fields = [];
 				$params = [];
 				$fbLead = new FbLead($fbLeadgen->getLeadgenId());
-				$data = $fbLead->getSelf($fields, $params)->exportAllData();
-				$json = json_encode($data, JSON_PRETTY_PRINT);
+				try{
+					$data = $fbLead->getSelf($fields, $params)->exportAllData();
+					$json = json_encode($data, JSON_PRETTY_PRINT);
+				}catch(AuthorizationException $e){
+					$json = $e->getMessage();
+				}catch(ServerException $e){
+					$json = $e->getMessage();
+				}
 			}
 			$entityManager->persist($fbLeadgen);
 			$entityManager->flush();

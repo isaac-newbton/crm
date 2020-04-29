@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Repository\FacebookLeadgenRepository;
+use App\Repository\OrganizationRepository;
 use App\Service\FacebookService;
 use Facebook\Exceptions\FacebookAuthenticationException;
 use Facebook\Exceptions\FacebookAuthorizationException;
@@ -9,6 +11,7 @@ use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Exceptions\FacebookSDKException;
 use Facebook\Exceptions\FacebookServerException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -88,5 +91,51 @@ class FacebookController extends AbstractController{
 		$fbService->setAccessToken((string)$accessToken);
 
 		return $this->redirectToRoute('facebook_login');
+	}
+
+	/**
+	 * @Route("/facebook/leadgen", name="facebook_leadgen_list")
+	 */
+	public function leadgen(FacebookLeadgenRepository $leadgenRepository){
+		$leadgens = $leadgenRepository->findBy(['completed'=>null], ['dt'=>'DESC']);
+		return $this->render('admin/facebook/leadgen/list.html.twig', [
+			'leadgens'=>$leadgens
+		]);
+	}
+
+	/**
+	 * @Route("/facebook/leadgen/{leadgenId}", name="facebook_leadgen_view")
+	 */
+	public function leadgenList(string $leadgenId, FacebookLeadgenRepository $leadgenRepository, OrganizationRepository $orgRepository){
+		$leadgens = $leadgenRepository->findBy(['leadgenId'=>$leadgenId]);
+		if(empty($leadgens)) $this->redirectToRoute('facebook_leadgen_list');
+		return $this->render('admin/facebook/leadgen/view.html.twig', [
+			'leadgenId'=>$leadgenId,
+			'leadgens'=>$leadgens,
+			'organizations'=>$orgRepository->findAll()
+		]);
+	}
+
+	/**
+	 * @Route("/facebook/leadgen/{leadgenId}/attempt", name="facebook_leadgen_attempt", methods={"POST"})
+	 */
+	public function attempt(Request $request, string $leadgenId, FacebookLeadgenRepository $leadgenRepository, OrganizationRepository $orgRepository, FacebookService $fbService){
+		$leadgens = $leadgenRepository->findBy(['leadgenId'=>$leadgenId]);
+		if(empty($leadgens)) $this->redirectToRoute('facebook_leadgen_list');
+		$organization = $orgRepository->findOneByEncodedUuid($request->request->get('organization'));
+		$entityManager = $this->getDoctrine()->getManager();
+		$results = [];
+		foreach($leadgens as $leadgen){
+			$leadgen->setOrganization($organization);
+			$leadgen->setFacebookPage($organization->getFacebookPage());
+			$entityManager->persist($leadgen);
+			$entityManager->flush();
+			$results[] = $fbService->attemptLeadgenLead($leadgen, $entityManager, $orgRepository);
+		}
+		return $this->render('admin/facebook/leadgen/attempt.html.twig', [
+			'leadgenId'=>$leadgenId,
+			'leadgens'=>$leadgens,
+			'results'=>$results
+		]);
 	}
 }

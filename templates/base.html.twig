@@ -6,6 +6,11 @@
         {% block stylesheets %}{% endblock %}
     </head>
     <body>
+        <div>
+            FunnelKake CRM:
+            <a href="{{ path('organization_home') }}">Organizations</a>
+            <a href="{{ path('facebook_leadgen_list') }}">FB Leadgen</a>
+        </div>
         {% block body %}{% endblock %}
         {% block javascripts %}{% endblock %}
     </body>
