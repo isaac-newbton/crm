@@ -65,12 +65,12 @@ class FacebookLeadgen
         return $this->id;
     }
 
-    public function getLeadgenId(): ?int
+    public function getLeadgenId(): ?string
     {
         return $this->leadgenId;
     }
 
-    public function setLeadgenId(int $leadgenId): self
+    public function setLeadgenId(string $leadgenId): self
     {
         $this->leadgenId = $leadgenId;
 
@@ -139,12 +139,12 @@ class FacebookLeadgen
 
     public function getFacebookPage(): ?string
     {
-        return $this->facebookPageId;
+        return $this->facebookPage;
     }
 
-    public function setFacebookPage(?string $facebookPageId): self
+    public function setFacebookPage(?string $facebookPage): self
     {
-        $this->facebookPageId = $facebookPageId;
+        $this->facebookPage = $facebookPage;
 
         return $this;
     }
