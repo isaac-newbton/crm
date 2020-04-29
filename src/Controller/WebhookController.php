@@ -44,9 +44,6 @@ class WebhookController extends AbstractController
          * todo: notify related org contacts after saving data
          */
 
-        $logfilePath = 'facebook/webhook_log.txt';
-        $filesystem->dumpFile($logfilePath, __LINE__);
-
         $challenge = $request->query->get('hub_challenge');
         $verify_token = $request->query->get('hub_verify_token');
         if(null!==$challenge && null!==$verify_token){
@@ -59,20 +56,14 @@ class WebhookController extends AbstractController
 
         $data = json_decode($request->getContent());
 
-        $filesystem->dumpFile($logfilePath, __LINE__);
-
         if(!is_object($data) || empty($data)) return new Response('Empty request', 400);
 
         // we have a leadgen object
 
         if(!empty($data->entry)){
 
-            $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($data, true));
-
             $leadgens = [];
             foreach($data->entry as $entryItem){
-
-                $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($entryItem, true));
 
                 if(isset($entryItem->changes) && !empty($entryItem->changes)){
                     foreach($entryItem->changes as $change){
@@ -83,53 +74,35 @@ class WebhookController extends AbstractController
                 }
             }
 
-            $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($data, true));
-
             if(!empty($leadgens)){
-
-                $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgens, true));
 
                 $entityManager = $this->getDoctrine()->getManager();
                 foreach($leadgens as $leadgen){
 
-                    $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgen, true));
-
                     if(isset($leadgen->leadgen_id)){
-
-                        $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgen, true));
 
                         $fbLeadgen = new FacebookLeadgen();
                         $fbLeadgen->setLeadgenId($leadgen->leadgen_id);
-                        $entityManager->persist($fbLeadgen);
                         if(isset($leadgen->page_id)){
 
-                            $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgen, true));
-
                             $fbLeadgen->setFacebookPage($leadgen->page_id);
-                            $organization = $organizationRepository->findOneBy(['facebookPage'=>(string)$leadgen->page_id]);
 
-                            $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($organization, true));
+                            $organization = $organizationRepository->findOneBy(['facebookPage'=>$leadgen->page_id]);
 
                             if($organization){
 
-                                $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($organization, true));
-
                                 $organization->addFacebookLeadgen($fbLeadgen);
-                                $entityManager->persist($organization);
                             }
                         }
+                        $entityManager->persist($fbLeadgen);
                         $entityManager->flush();
                         $json = $fbService->attemptLeadgenLead($fbLeadgen, $entityManager, $organizationRepository);
 
-                        $filesystem->dumpFile($logfilePath, __LINE__ . PHP_EOL . var_export($leadgen, true));
-
-                        return new JsonResponse(['result'=>$json ? json_decode($json, true) : false]);
+                        return new JsonResponse(['result'=>isset($json) ? json_decode($json, true) : false]);
                     }
                 }
             }
         }
-
-        $filesystem->dumpFile($logfilePath, __LINE__);
 
         return new JsonResponse(['request' => $request->request->all()], 200);
 
