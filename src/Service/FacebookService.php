@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Doctrine\UuidEncoder;
 use App\Entity\FacebookLeadgen;
 use App\Entity\Organization;
 use App\Repository\OrganizationRepository;
@@ -33,6 +34,11 @@ class FacebookService{
 	 */
 	protected $facebook;
 
+	/**
+	 * @var UuidEncoder|null;
+	 */
+	protected $uuidEncoder;
+
 	public function __construct(){
 		$this->appId = $_ENV['FB_APP_ID'];
 		$this->appSecret = $_ENV['FB_APP_SECRET'];
@@ -47,6 +53,7 @@ class FacebookService{
 			'app_secret'=>$_ENV['FB_APP_SECRET'],
 			'default_graph_version'=>'v'.$_ENV['FB_GRAPH_VERSION']
 		]);
+		$this->uuidEncoder = new UuidEncoder();
 	}
 
 	public function getFacebook(){
@@ -107,7 +114,8 @@ class FacebookService{
 		return false;
 	}
 
-	public function attemptLeadgenLead(FacebookLeadgen $fbLeadgen, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository){
+	public function attemptLeadgenLead(FacebookLeadgen $fbLeadgen, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, OrganizationLeadService $orgLeadService){
+		$result = false;
 		if(null==$fbLeadgen->getCompleted()){
 			$fbLeadgen->setAttempts($fbLeadgen->getAttempts() + 1);
 			if(null==$fbLeadgen->getOrganization()){
@@ -127,21 +135,34 @@ class FacebookService{
 				$fbLead = new FbLead($fbLeadgen->getLeadgenId());
 				try{
 					$data = $fbLead->getSelf($fields, $params)->exportAllData();
-					$json = json_encode($data, JSON_PRETTY_PRINT);
+					if($data && !empty($data)){
+						$json = json_encode($data);
+						$array = json_decode($json, true);
+						$fbLeadgen->setResult($array);
+						if(isset($array['field_data']) && !empty($array['field_data'])){
+							$fields = [];
+							foreach($array['field_data'] as $fieldData){
+								if(isset($fieldData['name']) && isset($fieldData['values']) && !empty($fieldData['values'])){
+									$fields[$fieldData['name']] = implode(',', $fieldData['values']);
+								}
+							}
+							$newLead = $orgLeadService->createLeadFromArray($organization, array_merge($fields, [
+								'_fb_leadgen_id'=>$fbLeadgen->getLeadgenId()
+							]), $entityManager);
+						}
+						$fbLeadgen->setCompleted(new \DateTime());
+					}
 				}catch(AuthorizationException $e){
-					$json = $e->getMessage();
+					$fbLeadgen->setResult(['error'=>$e->getMessage()]);
+					$result = ['error'=>$e->getMessage()];
 				}catch(ServerException $e){
-					$json = $e->getMessage();
+					$fbLeadgen->setResult(['error'=>$e->getMessage()]);
+					$result = ['error'=>$e->getMessage()];
 				}
 			}
 			$entityManager->persist($fbLeadgen);
 			$entityManager->flush();
 		}
-		if(isset($json)){
-			$this->filesystem->dumpFile('facebook/leadgen_data.txt', $json);
-		}else{
-			$this->filesystem->dumpFile('facebook/leadgen_data_fail.txt', json_encode($fbLeadgen));
-		}
-		return $json ?? false;
+		return $newLead ? ['lead'=>$this->uuidEncoder->encode($newLead->getUuid())] : $result;
 	}
 }

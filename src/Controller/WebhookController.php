@@ -8,13 +8,8 @@ use App\Repository\OrganizationRepository;
 use App\Service\FacebookService;
 use App\Service\OrganizationApiService;
 use App\Service\OrganizationLeadService;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use FacebookAds\Api;
-use FacebookAds\Logger\CurlLogger;
-use FacebookAds\Object\Lead;
+use App\Entity\Lead;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,21 +23,12 @@ class WebhookController extends AbstractController
      *
      * This endpoint is a catch all from facebook
      */
-    public function facebookAuth(
+    public function facebook(
         Request $request,
         OrganizationLeadService $organizationLeadService,
         OrganizationRepository $organizationRepository,
-        EntityManagerInterface $entityManagerInterface,
-        FacebookService $fbService,
-        Filesystem $filesystem
-    ) {
-
-        /**
-         * todo: if we are recieving a leadgen object:
-         * todo: token ($token) returned from previous step stored (somewhere)
-         * todo: retreive the lead details and store in database - fallback to store leadgen object in database
-         * todo: notify related org contacts after saving data
-         */
+        FacebookService $fbService
+    ){
 
         $challenge = $request->query->get('hub_challenge');
         $verify_token = $request->query->get('hub_verify_token');
@@ -96,61 +82,19 @@ class WebhookController extends AbstractController
                         }
                         $entityManager->persist($fbLeadgen);
                         $entityManager->flush();
-                        $json = $fbService->attemptLeadgenLead($fbLeadgen, $entityManager, $organizationRepository);
 
-                        return new JsonResponse(['result'=>isset($json) ? json_decode($json, true) : false]);
+                        /**
+                         * @var Lead|bool
+                         */
+                        $result = $fbService->attemptLeadgenLead($fbLeadgen, $entityManager, $organizationRepository, $organizationLeadService);
+
+                        return new JsonResponse(['result'=>$result], 200);
                     }
                 }
             }
         }
 
         return new JsonResponse(['request' => $request->request->all()], 200);
-
-        if ($data->object == 'page' && $data->entry[0]->changes[0]->field == 'leadgen') {
-            $leadgen = get_object_vars($data->entry[0]->changes[0]->value);
-            $page_id = $leadgen['page_id'];
-            $lead_data = $leadgen; // default
-            // try and find the page in the crm from this id
-            try {
-
-                $access_token = $fbService->getAccessToken();
-                $app_secret = $_ENV['FB_APP_SECRET'];
-                $app_id = $_ENV['FB_APP_ID'];
-                $id = $leadgen['leadgen_id'];
-
-                $api = Api::init($app_id, $app_secret, $access_token);
-                $api->setLogger(new CurlLogger());
-
-                $fields = array();
-                $params = array();
-                $resp = json_encode((new Lead($id))->getSelf(
-                    $fields,
-                    $params
-                )->exportAllData(), JSON_PRETTY_PRINT);
-
-                if ($resp) $lead_data = $resp->field_data;
-            } catch (Exception $e) {
-                // todo: handle this
-                error_log($e->getMessage());
-            }
-            if ($organization = $organizationRepository->findOneBy(['facebookPage' => $page_id])) {
-                $organizationLeadService->createLeadFromArray(
-                    $organization,
-                    $lead_data,
-                    $entityManagerInterface
-                );
-            } else {
-                return new JsonResponse('unable to find organization', 404);
-            }
-        }
-
-        // }
-
-        /**
-         * todo: if we are auth:
-         * todo: check if token exists (somewheere) and ping facebook to refresh
-         * todo: user logins to facebook and authorizes app to manage pages
-         */
     }
 
     /**
@@ -173,47 +117,6 @@ class WebhookController extends AbstractController
             return new JsonResponse(['error' => 'invalid key'], 401);
         }
         return new JsonResponse(['success' => true], 200);
-    }
-
-    /**
-     * @Route("/webhook/facebook/new_lead", name="webhook_facebook_new_lead")
-     */
-    public function facebook(Request $request, OrganizationRepository $orgRepository, OrganizationLeadService $orgLeadService, FacebookService $fbService)
-    {
-        $entry = $request->request->get('entry');
-        if(!empty($entry)){
-            $leadgens = [];
-            foreach($entry as $entryItem){
-                if(isset($entryItem['changes']) && !empty($entryItem['changes'])){
-                    foreach($entryItem['changes'] as $change){
-                        if('leadgen'===$change['field'] && isset($change['value']) && !empty($change['value'])){
-                            $leadgens[] = $change['value'];
-                        }
-                    }
-                }
-            }
-
-            if(!empty($leadgens)){
-                $entityManager = $this->getDoctrine()->getManager();
-                foreach($leadgens as $leadgen){
-                    if(isset($leadgen['leadgen_id']) && is_numeric($leadgen['leadgen_id'])){
-                        $fbLeadgen = new FacebookLeadgen();
-                        $fbLeadgen->setLeadgenId($leadgen['leadgen_id']);
-                        if(isset($leadgen['page_id']) && is_numeric($leadgen['page_id'])){
-                            $fbLeadgen->setFacebookPage($leadgen['page_id']);
-                            if($organization = $orgRepository->findOneBy(['facebookPage'=>$leadgen['page_id']])){
-                                $organization->addFacebookLeadgen($fbLeadgen);
-                                $entityManager->persist($organization);
-                            }
-                        }
-                        $entityManager->persist($fbLeadgen);
-                        $entityManager->flush();
-                        $fbService->attemptLeadgenLead($fbLeadgen, $entityManager, $orgRepository);
-                    }
-                }
-            }
-        }
-        return new JsonResponse(['request' => $request->request->all()], 200);
     }
 
     /**
