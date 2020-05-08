@@ -18,6 +18,7 @@
 						}}
 					</tbody>
 				</table>
+				<a href="{{ path('resend_notification', {encodedLeadUuid: uuid_encode(lead.uuid)}) }}">Resend Notification</a>
 			</li>
 
 			{# Specific logic to display leads sent from WPFORMS plugin #}

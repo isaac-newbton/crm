@@ -1,8 +1,12 @@
 <?php
 namespace App\Controller;
 
+use App\Doctrine\UuidEncoder;
+use App\Entity\Lead;
+use App\Repository\LeadRepository;
 use App\Service\EmailService;
 use App\Service\FacebookService;
+use App\Service\OrganizationLeadService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,6 +38,21 @@ class SuperAdminController extends AbstractController{
 			'sent' => $sent ? var_export($sent, true) : false
 		]);
 
+	}
+
+	/**
+	 * @Route("/super/resend/{encodedLeadUuid}", name="resend_notification")
+	 */
+	public function resendNotification(string $encodedLeadUuid, LeadRepository $leadRepository, UuidEncoder $encoder, OrganizationLeadService $orgLeadService){
+		/**
+		 * @var Lead|null
+		 */
+		$lead = $leadRepository->findOneByEncodedUuid($encodedLeadUuid);
+		if($lead){
+			$orgLeadService->sendNewLeadNotifications($lead);
+			return $this->redirectToRoute('organization_leads', ['encodedUuid'=>$encoder->encode($lead->getOrganization()->getUuid())]);
+		}
+		return $this->redirectToRoute('super_email');
 	}
 
 	/**

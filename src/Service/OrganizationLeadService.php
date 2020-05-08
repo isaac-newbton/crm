@@ -26,7 +26,12 @@ class OrganizationLeadService{
 	public function createLeadFromArray(Organization $organization, array $fields, EntityManagerInterface $entityManager){
 		if(empty($fields)) return false;
 		$lead = new Lead();
-		$lead->setFields($fields);
+		$capitalizedFields = [];
+		foreach($fields as $key=>$value){
+			$capitalizedKey = ucwords(trim(str_replace('_', ' ', $key)));
+			$capitalizedFields[$capitalizedKey] = $value;
+		}
+		$lead->setFields($capitalizedFields);
 		$organization->addLead($lead);
 		$entityManager->persist($lead);
 		$entityManager->persist($organization);
@@ -61,12 +66,14 @@ class OrganizationLeadService{
 		$emails = $this->contactEmailsForOrganization($lead->getOrganization());
 		$mobileNumbers = $this->contactMobileNumbersForOrganization($lead->getOrganization());
 		if(!empty($emails)){
+			$leadFields = $lead->getFields();
 			$from = "{$_ENV['MAILGUN_DEFAULT_EMAIL_USER']}@{$_ENV['MAILGUN_DOMAIN']}";
+			$emailTitle = 'New' . ((isset($leadFields['_lead_source']) && 'retreaver'===$leadFields['_lead_source']) ? ' Phone' : '') . " Lead from {$_ENV['APP_NAME']}";
 			if(filter_var($from, FILTER_VALIDATE_EMAIL)){
 				foreach($emails as $email){
 					if(filter_var($email, FILTER_VALIDATE_EMAIL)){
-						$this->emailService->sendSingleHtml($email, "New Lead", $this->twig->render('email/notification/new_lead.html.twig', [
-							'title'=>'New Lead',
+						$this->emailService->sendSingleHtml($email, $emailTitle, $this->twig->render('email/notification/new_lead.html.twig', [
+							'title'=>$emailTitle,
 							'lead'=>$lead
 						]), $from);
 					}
