@@ -130,7 +130,7 @@ class WebhookController extends AbstractController
         if (!$orgApiService->keyIsValid($organization, $orgApiKey)) {
             return new JsonResponse(['error' => 'invalid key'], 401);
         }
-        if (!$lead = $orgLeadService->createLeadFromArray($organization, array_merge($request->query->all(), ['_lead_source'=>'retreaver']), $this->getDoctrine()->getManager())) {
+        if (!$lead = $orgLeadService->createLeadFromArray($organization, array_merge($request->query->all(), ['_lead_source'=>'Retreaver']), $this->getDoctrine()->getManager())) {
             return new JsonResponse(['error' => 'lead creation failed'], 401);
         }
         return new JsonResponse(['lead' => $uuidEncoder->encode($lead->getUuid())], 200);
@@ -147,7 +147,12 @@ class WebhookController extends AbstractController
         if (!$orgApiService->keyIsValid($organization, $orgApiKey)) {
             return new JsonResponse(['error' => 'invalid key'], 401);
         }
-        if (!$lead = $orgLeadService->createLeadFromArray($organization, array_merge($request->request->all(), ['_lead_source'=>'custom']), $this->getDoctrine()->getManager())) {
+        $params = $request->request->all();
+        $submissionUrl = $request->request->get('_submission_url');
+        if($submissionUrl){
+            unset($params['_submission_url']);
+        }
+        if (!$lead = $orgLeadService->createLeadFromArray($organization, array_merge($params, ['_lead_source'=>($submissionUrl ?? 'Custom')]), $this->getDoctrine()->getManager())) {
             return new JsonResponse(['error' => 'lead creation failed'], 401);
         }
         return new JsonResponse(['lead' => $uuidEncoder->encode($lead->getUuid())], 200);

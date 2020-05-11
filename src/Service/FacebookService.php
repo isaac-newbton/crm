@@ -147,7 +147,7 @@ class FacebookService{
 								}
 							}
 							$newLead = $orgLeadService->createLeadFromArray($organization, array_merge($fields, [
-								'_fb_leadgen_id'=>$fbLeadgen->getLeadgenId()
+								'_lead_source'=>'Facebook'
 							]), $entityManager);
 						}
 						$fbLeadgen->setCompleted(new \DateTime());
