@@ -25,7 +25,7 @@
 								</td>
 							</tr>
 							{{ lead.fields|map((fieldValue,fieldName)=>
-								"<tr><td style=\"font-weight:bold;\">#{fieldName}:</td><td>#{fieldValue}</td></tr>"|raw|replace({'_':' '}))|join('')|raw
+								"<tr><td style=\"font-weight:bold;\">#{fieldName}:</td><td>#{fieldValue}</td></tr>"|raw)|join('')|raw
 							}}
 						</tbody>
 					</table>
