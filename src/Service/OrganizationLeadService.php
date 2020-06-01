@@ -68,7 +68,7 @@ class OrganizationLeadService{
 		if(!empty($emails)){
 			$leadFields = $lead->getFields();
 			$from = "{$_ENV['MAILGUN_DEFAULT_EMAIL_USER']}@{$_ENV['MAILGUN_DOMAIN']}";
-			$emailTitle = 'New' . ((isset($leadFields['_lead_source']) && 'retreaver'===strtolower($leadFields['_lead_source'])) ? ' Phone' : '') . " Lead from {$_ENV['APP_NAME']}";
+			$emailTitle = 'New' . ((isset($leadFields['Lead Source']) && 'retreaver'===strtolower($leadFields['Lead Source'])) ? ' Phone' : '') . " Lead from {$_ENV['APP_NAME']}";
 			if(filter_var($from, FILTER_VALIDATE_EMAIL)){
 				foreach($emails as $email){
 					if(filter_var($email, FILTER_VALIDATE_EMAIL)){
