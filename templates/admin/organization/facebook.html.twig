@@ -1,0 +1,26 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>Facebook | {{ organization.name }}</h1>
+	<p><a href="{{ path('organization_home') }}">-Cancel</a></p>
+	<p>Use this page to connect an organization ({{ organization.name }}) to a Facebook page.</p>
+	<p><em>If no accounts are selectable, make sure the app is connected to Facebook: <a href="{{ path('facebook_login') }}">Login to Facebook</a></em></p>
+	<h2>
+		Current Status:
+		{% if organization.facebookPage is empty %}
+			<span style="color:red">NOT CONNECTED</span>
+		{% else %}
+			CONNECTED to <a href="https://facebook.com/{{ organization.facebookPage }}" target="_blank">page {{ organization.facebookPage }}</a>
+		{% endif %}
+	</h2>
+	<form action="{{ path('organization_update_facebook', {encodedUuid:uuid_encode(organization.uuid)}) }}" method="post">
+		<label for="facebook">Page</label>
+		<select name="facebook" id="facebook">
+			<option value="">None</option>
+			{% for account in accounts %}
+				<option value="{{ account.id }},{{ account.access_token }}" {{ account.id == organization.facebookPage ? ' selected' : ' n' }}>{{ account.name }}</option>
+			{% endfor %}
+		</select><br>
+		<button type="submit">Save</button>
+	</form>
+{% endblock %}

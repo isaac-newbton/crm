@@ -42,12 +42,23 @@ class Organization
      */
     private $facebookPage;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\FacebookLeadgen", mappedBy="organization")
+     */
+    private $facebookLeadgens;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $facebookPageAccessToken;
+
     public function __construct()
     {
         $this->uuid = Uuid::uuid4();
         $this->contacts = new ArrayCollection();
         $this->organizationApis = new ArrayCollection();
         $this->leads = new ArrayCollection();
+        $this->facebookLeadgens = new ArrayCollection();
     }
 
     public function getName(): ?string
@@ -163,6 +174,49 @@ class Organization
     public function setFacebookPage(?string $facebookPage): self
     {
         $this->facebookPage = $facebookPage;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|FacebookLeadgen[]
+     */
+    public function getFacebookLeadgens(): Collection
+    {
+        return $this->facebookLeadgens;
+    }
+
+    public function addFacebookLeadgen(FacebookLeadgen $facebookLeadgen): self
+    {
+        if (!$this->facebookLeadgens->contains($facebookLeadgen)) {
+            $this->facebookLeadgens[] = $facebookLeadgen;
+            $facebookLeadgen->setOrganization($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFacebookLeadgen(FacebookLeadgen $facebookLeadgen): self
+    {
+        if ($this->facebookLeadgens->contains($facebookLeadgen)) {
+            $this->facebookLeadgens->removeElement($facebookLeadgen);
+            // set the owning side to null (unless already changed)
+            if ($facebookLeadgen->getOrganization() === $this) {
+                $facebookLeadgen->setOrganization(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getFacebookPageAccessToken(): ?string
+    {
+        return $this->facebookPageAccessToken;
+    }
+
+    public function setFacebookPageAccessToken(?string $facebookPageAccessToken): self
+    {
+        $this->facebookPageAccessToken = $facebookPageAccessToken;
 
         return $this;
     }

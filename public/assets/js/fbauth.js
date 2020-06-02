@@ -1,10 +1,10 @@
-const access_token = null;
+let access_token = null;
 window.fbAsyncInit = function () {
 	FB.init({ appId: '235215051190155', xfbml: true, version: 'v6.0' });
 };
 
 // todo: try fetch the access token from the backend somehow
-
+console.log(access_token)
 if (access_token) {
 	const p = document.createElement('p');
 	p.innerText = `Currently authorized - Expires [expiredate]`;

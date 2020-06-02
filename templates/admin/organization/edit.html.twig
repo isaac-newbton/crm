@@ -6,8 +6,6 @@
 	<form action="{{ path('organization_update', {encodedUuid:uuid_encode(organization.uuid)}) }}" method="post">
 		<label for="name">Name*</label>
 		<input type="text" name="name" id="name" required placeholder="Name is required" value="{{ organization.name }}"><br>
-		<label for="facebookPage">FB Page ID</label>
-		<input type="text" name="facebookPage" id="facebookPage" placeholder="Facebook page ID" value="{{ organization.facebookPage }}"><br>
 		<button type="submit">Save</button>
 	</form>
 {% endblock %}

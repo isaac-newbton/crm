@@ -1,0 +1,39 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>{{ leadgens|length }} Leadgen{{ (1 != leadgens|length) ? 's' : '' }} matching {{ leadgenId }}</h1>
+	<p><a href="{{ path('facebook_leadgen_list') }}">-Back</a></p>
+	<p>Attempt to convert this into a full lead by matching it to an organization.</p>
+	<form action="{{ path('facebook_leadgen_attempt', {leadgenId:leadgens|first.leadgenId}) }}" method="post">
+		<label for="organization">Organization</label>
+		<select name="organization" id="organization" required>
+			<option value="">None</option>
+			{% for organization in organizations %}
+				<option value="{{ uuid_encode(organization.uuid) }}" {{ (leadgens|first.organization == organization) ? 'selected' : '' }}>{{ organization.name }}</option>
+			{% endfor %}
+		</select>
+		<button type="submit">Attempt to populate</button>
+	</form>
+	<h2>Instances of this Leadgen</h2>
+	<table>
+		<tbody>
+			{% for leadgen in leadgens %}
+				<tr>
+					<td>
+						{{ leadgen.dt|date('M j Y g:i:sA') }}
+					</td>
+					<td>
+						{{ leadgen.attempts }} attempt{{ (1 != leadgen.attempts) ? 's' : '' }}
+					</td>
+					<td>
+						{% if leadgen.completed %}
+							Completed {{ leadgen.completed|date('m/d/Y') }}
+						{% else %}
+							Never completed
+						{% endif %}
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

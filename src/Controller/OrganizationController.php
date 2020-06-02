@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Doctrine\UuidEncoder;
 use App\Entity\Organization;
 use App\Repository\OrganizationRepository;
+use App\Service\FacebookService;
+use Facebook\Exceptions\FacebookSDKException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -89,10 +91,8 @@ class OrganizationController extends AbstractController
 	{
 		if ($organization = $orgRepository->findOneByEncodedUuid($encodedUuid)) {
 			$name = $request->request->get('name');
-			$facebookPage = $request->request->get('facebookPage');
 			if (!empty($name)) {
 				$organization->setName($name);
-				$organization->setFacebookPage($facebookPage);
 				$manager = $this->getDoctrine()->getManager();
 				$manager->persist($organization);
 				$manager->flush();
@@ -112,5 +112,55 @@ class OrganizationController extends AbstractController
 				'organization' => $organization
 			]);
 		}
+	}
+
+	/**
+	 * @Route("/admin/organization/{encodedUuid}/facebook", name="organization_facebook")
+	 */
+	public function facebook(string $encodedUuid, OrganizationRepository $orgRepository, FacebookService $fbService){
+		$organization = $orgRepository->findOneByEncodedUuid($encodedUuid);
+		if(!$organization) return $this->redirectToRoute('organization_home');
+
+		if($accountsResponse = $fbService->getAccounts()){
+			$accounts = $accountsResponse->getDecodedBody();
+			usort($accounts['data'], function($a, $b){
+				if($a['name']===$b['name']) return 0;
+				return ($a['name']<$b['name']) ? -1 : 1;
+			});
+		}
+
+		return $this->render(
+			'admin/organization/facebook.html.twig',
+			[
+				'organization'=>$organization,
+				'globalAccessToken'=>$fbService->getAccessToken(),
+				'accounts'=>isset($accounts) ? $accounts['data'] : false
+			]
+		);
+	}
+
+	/**
+	 * @Route("/admin/organization/{encodedUuid}/update/facebook", name="organization_update_facebook")
+	 */
+	public function updateFacebook(Request $request, string $encodedUuid, OrganizationRepository $orgRepository, FacebookService $fbService){
+		if ($organization = $orgRepository->findOneByEncodedUuid($encodedUuid)) {
+			$facebook = explode(',', $request->request->get('facebook'));
+			if(2==count($facebook) && ''!=trim($facebook[0]) && ''!=trim($facebook[1])){
+				$fbPage = $facebook[0];
+				$fbAccessToken = $facebook[1];
+			}else{
+				$fbPage = null;
+				$fbAccessToken = null;
+			}
+			$organization->setFacebookPage($fbPage);
+			$organization->setFacebookPageAccessToken($fbAccessToken);
+			$manager = $this->getDoctrine()->getManager();
+			$manager->persist($organization);
+			$manager->flush();
+		}
+		return $this->redirectToRoute('organization_home', [
+			'_fragment' => $organization ? $organization->getId() : '0',
+			'leadgen' => ($organization && $fbService->subscribeToLeadgen($organization)) ? 'subscribed' : 'not_subscribed'
+		]);
 	}
 }

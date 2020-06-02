@@ -14,3 +14,7 @@
 .phpunit.result.cache
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
+
+###> facebook api access ###
+/public/facebook/
+###< facebook api access ###

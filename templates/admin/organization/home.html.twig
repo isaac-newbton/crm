@@ -35,9 +35,14 @@
 						{{ uuid_encode(organization.uuid) }}
 					</td>
 					<td>
-						{{ organization.facebookPage }}
+						{% if organization.facebookPage is empty %}
+							<a href="{{ path('organization_facebook', {encodedUuid:uuid_encode(organization.uuid)}) }}">Connect</a>
+						{% else %}
+							<a href="https://facebook.com/{{ organization.facebookPage }}" target="_blank">Page {{ organization.facebookPage }}</a>
+						{% endif %}
 					</td>
 					<td>
+						<a href="{{ path('organization_facebook', {encodedUuid:uuid_encode(organization.uuid)}) }}">Change Facebook Connection<a>
 						<a href="{{ path('organization_delete', {encodedUuid:uuid_encode(organization.uuid)}) }}">Delete</a>
 					</td>
 				</tr>
