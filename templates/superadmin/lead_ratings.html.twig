@@ -1,0 +1,20 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h2>Description</h2>
+	<p>Rating labels to be used as values for properties like 'internal review/rating', 'client review/rating', etc... for lead entities instead of using hardcoded values</p>
+
+	{{ form(addForm) }}
+
+		<ul>
+			{% for leadRating in leadRatings %}
+				<li>
+					<form action="" method='post' onsubmit="return confirm('Are you sure?')">
+						{{leadRating.label}}
+						<input type="hidden" name="id" value={{leadRating.id}}/>
+						<input type="submit" value="delete"/>
+					</form>
+				</li>
+			{% endfor %}
+		</ul>
+	{% endblock %}
