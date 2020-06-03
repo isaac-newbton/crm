@@ -35,17 +35,19 @@
 			{% endif %}
 
 			{# BEGIN internal lead rating form !!!! temporary implementation !!! #}
-			<form method='post' style='padding:5px;margin:5px; {{ lead.internalRating ? ' ' : ' border-left: 45px solid red;' }}' action='{{ path("update_internal_lead_rating", {encodedLeadUuid: uuid_encode(lead.uuid)}) }}'>
-				<label for="leadRating">Internal Lead Rating
-					<select name="leadRating">
-						<option value="" selected disabled>select one...</option>
-						{% for leadRating in leadRatings %}
-							<option {{ lead.internalRating == leadRating ? 'selected' : '' }} value={{leadRating.id}}>{{leadRating.label}}</option>
-						{% endfor %}
-					</select>
-				</label>
-				<input type="submit" value="save">
-			</form>
+			{% if is_granted('ROLE_SUPER_ADMIN') %}
+				<form method='post' style='padding:5px;margin:5px; {{ lead.internalRating ? ' ' : ' border-left: 45px solid red;' }}' action='{{ path("update_internal_lead_rating", {encodedLeadUuid: uuid_encode(lead.uuid)}) }}'>
+					<label for="leadRating">Internal Lead Rating
+						<select name="leadRating">
+							<option value="" selected disabled>select one...</option>
+							{% for leadRating in leadRatings %}
+								<option {{ lead.internalRating == leadRating ? 'selected' : '' }} value={{leadRating.id}}>{{leadRating.label}}</option>
+							{% endfor %}
+						</select>
+					</label>
+					<input type="submit" value="save">
+				</form>
+			{% endif %}
 			{# END internal lead rating form !!!! temporary implementation !!! #}
 
 		{% endfor %}
