@@ -5,10 +5,13 @@ namespace App\Controller;
 use App\Doctrine\UuidEncoder;
 use App\Entity\Lead;
 use App\Entity\LeadRating;
+use App\Repository\LeadRatingRepository;
 use App\Repository\LeadRepository;
+use App\Repository\OrganizationRepository;
 use App\Service\EmailService;
 use App\Service\FacebookService;
 use App\Service\OrganizationLeadService;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -103,5 +106,33 @@ class SuperAdminController extends AbstractController
 			"leadRatings" => $leadRatings,
 			"addForm" => $addForm->createView(),
 		]);
+	}
+
+	/**
+	 * @route("/super/{encodedLeadUuid}/internal_rating/update", name="update_internal_lead_rating", methods={"POST"})
+	 * ! this is a temporary implementation and should be removed in a future update!
+	 */
+	public function updateInternalLeadRating(
+		Request $request,
+		string $encodedLeadUuid,
+		LoggerInterface $loggerInterface,
+		LeadRepository $leadRepository,
+		LeadRatingRepository $leadRatingRepository,
+		OrganizationRepository $organizationRepository,
+		UuidEncoder $encoder
+	) {
+
+		$loggerInterface->warning('route:update_internal_lead_rating will be removed in future updates - be sure to adjust accordingly!');
+
+		$lead = $leadRepository->findOneByEncodedUuid($encodedLeadUuid);
+		$leadRating = $leadRatingRepository->find($request->request->get('leadRating'));
+		if ($lead && $leadRating) {
+			$lead->setInternalRating($leadRating);
+
+			$entityManager = $this->getDoctrine()->getManager();
+			$entityManager->persist($lead);
+			$entityManager->flush();
+		}
+		return $this->redirectToRoute('organization_leads', ["encodedUuid" => $encoder->encode($lead->getOrganization()->getUuid())]);
 	}
 }

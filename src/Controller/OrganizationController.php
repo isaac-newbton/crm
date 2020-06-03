@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Doctrine\UuidEncoder;
+use App\Entity\LeadRating;
 use App\Entity\Organization;
 use App\Repository\OrganizationRepository;
 use App\Service\FacebookService;
@@ -44,11 +45,11 @@ class OrganizationController extends AbstractController
 	public function edit(string $encodedUuid, OrganizationRepository $orgRepository)
 	{
 		$organization = $orgRepository->findOneByEncodedUuid($encodedUuid);
-		if(!$organization) return $this->redirectToRoute('organization_home');
+		if (!$organization) return $this->redirectToRoute('organization_home');
 		return $this->render(
 			'admin/organization/edit.html.twig',
 			[
-				'organization'=>$organization
+				'organization' => $organization
 			]
 		);
 	}
@@ -108,8 +109,11 @@ class OrganizationController extends AbstractController
 	public function organizationLeads(string $encodedUuid, OrganizationRepository $organizationRepository)
 	{
 		if ($organization = $organizationRepository->findOneByEncodedUuid($encodedUuid)) {
+
+			$leadRatings = $this->getDoctrine()->getRepository(LeadRating::class)->findAll();
 			return $this->render('admin/organization/leads.html.twig', [
-				'organization' => $organization
+				'organization' => $organization,
+				'leadRatings' => $leadRatings
 			]);
 		}
 	}
@@ -117,24 +121,25 @@ class OrganizationController extends AbstractController
 	/**
 	 * @Route("/admin/organization/{encodedUuid}/facebook", name="organization_facebook")
 	 */
-	public function facebook(string $encodedUuid, OrganizationRepository $orgRepository, FacebookService $fbService){
+	public function facebook(string $encodedUuid, OrganizationRepository $orgRepository, FacebookService $fbService)
+	{
 		$organization = $orgRepository->findOneByEncodedUuid($encodedUuid);
-		if(!$organization) return $this->redirectToRoute('organization_home');
+		if (!$organization) return $this->redirectToRoute('organization_home');
 
-		if($accountsResponse = $fbService->getAccounts()){
+		if ($accountsResponse = $fbService->getAccounts()) {
 			$accounts = $accountsResponse->getDecodedBody();
-			usort($accounts['data'], function($a, $b){
-				if($a['name']===$b['name']) return 0;
-				return ($a['name']<$b['name']) ? -1 : 1;
+			usort($accounts['data'], function ($a, $b) {
+				if ($a['name'] === $b['name']) return 0;
+				return ($a['name'] < $b['name']) ? -1 : 1;
 			});
 		}
 
 		return $this->render(
 			'admin/organization/facebook.html.twig',
 			[
-				'organization'=>$organization,
-				'globalAccessToken'=>$fbService->getAccessToken(),
-				'accounts'=>isset($accounts) ? $accounts['data'] : false
+				'organization' => $organization,
+				'globalAccessToken' => $fbService->getAccessToken(),
+				'accounts' => isset($accounts) ? $accounts['data'] : false
 			]
 		);
 	}
@@ -142,13 +147,14 @@ class OrganizationController extends AbstractController
 	/**
 	 * @Route("/admin/organization/{encodedUuid}/update/facebook", name="organization_update_facebook")
 	 */
-	public function updateFacebook(Request $request, string $encodedUuid, OrganizationRepository $orgRepository, FacebookService $fbService){
+	public function updateFacebook(Request $request, string $encodedUuid, OrganizationRepository $orgRepository, FacebookService $fbService)
+	{
 		if ($organization = $orgRepository->findOneByEncodedUuid($encodedUuid)) {
 			$facebook = explode(',', $request->request->get('facebook'));
-			if(2==count($facebook) && ''!=trim($facebook[0]) && ''!=trim($facebook[1])){
+			if (2 == count($facebook) && '' != trim($facebook[0]) && '' != trim($facebook[1])) {
 				$fbPage = $facebook[0];
 				$fbAccessToken = $facebook[1];
-			}else{
+			} else {
 				$fbPage = null;
 				$fbAccessToken = null;
 			}

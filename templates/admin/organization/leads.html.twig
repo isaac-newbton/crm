@@ -11,7 +11,9 @@
 				<table>
 					<tbody>
 						<tr>
-							<td colspan="2">{{ lead.dt|date("g:iA") }} on {{ lead.dt|date("F j, Y") }}</td>
+							<td colspan="2">{{ lead.dt|date("g:iA") }}
+								on
+								{{ lead.dt|date("F j, Y") }}</td>
 						</tr>
 						{{ lead.fields|map((fieldValue,fieldName)=>
 							"<tr><td style=\"font-weight:bold;\">#{fieldName}</td><td>#{fieldValue}</td></tr>")|join('')|raw
@@ -31,6 +33,20 @@
 				{% endfor %}
 				<hr>
 			{% endif %}
+
+			{# BEGIN internal lead rating form !!!! temporary implementation !!! #}
+			<form method='post' style='padding:5px;margin:5px; {{ lead.internalRating ? ' ' : ' border-left: 45px solid red;' }}' action='{{ path("update_internal_lead_rating", {encodedLeadUuid: uuid_encode(lead.uuid)}) }}'>
+				<label for="leadRating">Internal Lead Rating
+					<select name="leadRating">
+						<option value="" selected disabled>select one...</option>
+						{% for leadRating in leadRatings %}
+							<option {{ lead.internalRating == leadRating ? 'selected' : '' }} value={{leadRating.id}}>{{leadRating.label}}</option>
+						{% endfor %}
+					</select>
+				</label>
+				<input type="submit" value="save">
+			</form>
+			{# END internal lead rating form !!!! temporary implementation !!! #}
 
 		{% endfor %}
 	</ul>
