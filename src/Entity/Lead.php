@@ -28,6 +28,11 @@ class Lead
      */
     private $organization;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\LeadRating", inversedBy="leads")
+     */
+    private $internalRating;
+
     public function __construct()
     {
         $this->uuid = Uuid::uuid4();
@@ -66,6 +71,18 @@ class Lead
     public function setOrganization(?Organization $organization): self
     {
         $this->organization = $organization;
+
+        return $this;
+    }
+
+    public function getInternalRating(): ?LeadRating
+    {
+        return $this->internalRating;
+    }
+
+    public function setInternalRating(?LeadRating $internalRating): self
+    {
+        $this->internalRating = $internalRating;
 
         return $this;
     }
