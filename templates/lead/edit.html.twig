@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Lead
+{% endblock %}
+
+{% block body %}
+	<h1>Edit Lead</h1>
+
+	{{ include('lead/_form.html.twig', {'button_label': 'Update'}) }}
+
+	<a href="{{ path('organization_leads', {encodedUuid: uuid_encode(lead.organization.uuid)}) }}">Organization Leads</a>
+
+
+{% endblock %}

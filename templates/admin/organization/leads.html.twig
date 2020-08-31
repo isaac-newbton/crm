@@ -6,14 +6,19 @@
 		Leads</h1>
 	<ul>
 		{% for lead in organization.leads %}
-
 			<li>
 				<table>
 					<tbody>
 						<tr>
 							<td colspan="2">{{ lead.dt|date("g:iA") }}
 								on
-								{{ lead.dt|date("F j, Y") }}</td>
+								{{ lead.dt|date("F j, Y") }}
+
+								<a href="{{ path('lead_edit', {id:lead.id}) }}">
+									<button>edit</button>
+								</a>
+							</td>
+
 						</tr>
 						{{ lead.fields|map((fieldValue,fieldName)=>
 							"<tr><td style=\"font-weight:bold;\">#{fieldName}</td><td>#{fieldValue}</td></tr>")|join('')|raw

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Doctrine\UuidEncoder;
 use App\Entity\LeadRating;
 use App\Entity\Organization;
+use App\Form\LeadType;
 use App\Repository\OrganizationRepository;
 use App\Service\FacebookService;
 use Facebook\Exceptions\FacebookSDKException;
@@ -110,10 +111,11 @@ class OrganizationController extends AbstractController
 	{
 		if ($organization = $organizationRepository->findOneByEncodedUuid($encodedUuid)) {
 
+
 			$leadRatings = $this->getDoctrine()->getRepository(LeadRating::class)->findAll();
 			return $this->render('admin/organization/leads.html.twig', [
 				'organization' => $organization,
-				'leadRatings' => $leadRatings
+				'leadRatings' => $leadRatings,
 			]);
 		}
 	}
